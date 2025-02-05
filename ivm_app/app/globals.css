@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --aspect: 1.7778;
+  --is-landscape: calc(min(1, max(0, round(down, var(--aspect), 1))));
+  --is-portrait: calc(1 - var(--is-landscape));
+  --grid-row-height: calc(var(--is-portrait) * 24px + var(--is-landscape) * (16px + 16px * (var(--aspect) - 1)));
+}
+
+.grid-row {
+  height: var(--grid-row-height);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+} */
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
