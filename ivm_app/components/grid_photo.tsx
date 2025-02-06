@@ -12,7 +12,7 @@ interface GridPhotoProps {
 const GridPhoto: React.FC<GridPhotoProps> = ({ gridCell: gridArea, src, alt }) => {
   return (
     <GridCell gridArea={gridArea}>
-      <img src={src} alt={alt} className="h-full w-full object-cover rounded-xl" />
+      <img src={src} alt={alt} className="h-full w-full object-cover rounded-xl p-1" />
     </GridCell>
   )
 }

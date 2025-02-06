@@ -9,7 +9,7 @@ interface GridTextProps {
 const GridText: React.FC<GridTextProps> = ({ gridCell: gridArea, children }) => {
   return (
     <GridCell gridArea={gridArea}>
-      <p className="overflow-hidden">
+      <p className="overflow-hidden p-1">
         {children}
       </p>
     </GridCell>
