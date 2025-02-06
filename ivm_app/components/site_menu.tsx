@@ -4,10 +4,12 @@ import { useState } from "react";
 
 const menuStyle = {
   position: "absolute" as const,
-  top: "10px",
-  right: "10px",
+  top: "6px",
+  right: "6px",
   cursor: "pointer",
   color: "#f0f0f0",
+  padding: "0px",
+  margin: "0px",
 };
 
 const overlayStyle = {
@@ -29,6 +31,28 @@ const menuContentStyle = {
   borderRadius: "8px",
 };
 
+
+const headerStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  width: '100%',
+  // backgroundColor: '#fff',
+  padding: '0px',
+  paddingBottom: '1px',
+  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  zIndex: 1000
+};
+
+const headerImg = {
+  width: "100%",
+  height: "36px",
+}
+
+
 const SiteMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -37,7 +61,8 @@ const SiteMenu = () => {
   };
 
   return (
-    <>
+    <header style={headerStyle}>
+      <img src="/ivm_green.png" alt="ivm" style={headerImg} />
       <div style={menuStyle} onClick={toggleMenu} >
         &#9776; Menu
       </div>
@@ -46,14 +71,14 @@ const SiteMenu = () => {
           <div style={menuContentStyle} onClick={(e) => e.stopPropagation()}>
             <h2>Menu</h2>
             <ul>
-              <li>Home</li>
-              <li>About</li>
-              <li>Contact</li>
+              <li><a href="#home">Home</a></li>
+              <li><a href="#floorplans">Floor Plans</a></li>
+              <li><a href="#contact">Contact</a></li>
             </ul>
           </div>
         </div>
       )}
-    </>
+    </header>
   );
 }
 

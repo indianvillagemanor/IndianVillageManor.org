@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <WindowContext.Provider value={{ portrait, rowHeight }}>
-      <GridSection rows={29}>
+      <GridSection rows={29} id="home">
         <GridGraphic gridCell={[1, 1, 7, 1]} src="IVM Logo Design_Black_24 0225_t.png" alt="IVM Logo" />
         <GridHeader gridCell={[1, 2, 2, 2]}>INDIAN VILLAGE MANOR</GridHeader>
         <GridText gridCell={[9, 1, 9, 1]}>
@@ -50,7 +50,7 @@ export default function Home() {
         <GridPhoto gridCell={[11, 1, 13, 1]} src="FirstFloor.jpg" alt="IVM First Floor" />
         <GridPhoto gridCell={[14, 2, 10, 2]} src="RiverfrontE.jpg" alt="IVM Riverfront East View" />
       </GridSection>
-      <GridSection rows={22} green>
+      <GridSection rows={22} green id="floorplans">
         <GridGraphic gridCell={[7, 1, 14, 1]} src="FloorPlanABMN_white.png" alt="IVM Floor Plan for A,B,M and N units" zoom />
         <GridText gridCell={[1, 2, 12, 1]}>
           These well appointed and maintained condominiums offer 3 distinct layouts (2,300-2,500 sq. ft. 11 room maximum). Each unit expresses a variety of different tastes and styles yet maintain the original architectural charm.
@@ -64,7 +64,7 @@ export default function Home() {
         <GridPhoto gridCell={[11, 1, 14, 2]} src="Interior4.jpg" alt="IVM Interior #4" />
         <GridPhoto gridCell={[11, 3, 14, 1]} src="Exterior.jpg" alt="IVM Front Exterior" />
       </GridSection>
-      <GridSection rows={20}>
+      <GridSection rows={20} id="contact">
         <GridPhoto gridCell={[1, 1, 20, 2]} src="ivm_front_door.jpg" alt="IVM Front Door" />
         <GridHeader gridCell={[3, 3, 2, 1]}>Contact</GridHeader>
         <GridText gridCell={[7, 3, 4, 1]} className="text-lg">

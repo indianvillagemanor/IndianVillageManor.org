@@ -4,10 +4,11 @@ import { WindowContext } from './window_context';
 interface GridSectionProps {
   rows: number;
   green?: boolean;
+  id?: string;
   children: ReactNode;
 }
 
-const GridSection = ({ rows, green, children }: GridSectionProps) => {
+const GridSection = ({ rows, id, green, children }: GridSectionProps) => {
   const { portrait, rowHeight } = useContext(WindowContext);
   const aspectColumns = portrait ? 1 : 3
   const gridStyle =
@@ -27,10 +28,10 @@ const GridSection = ({ rows, green, children }: GridSectionProps) => {
   }
 
   const style = portrait ? flowStyle : gridStyle
-  const cls = green ? "dark" : ""
+  const cls = "scroll-offset" + (green ? " dark" : "")
 
   return (
-    <div style={style} className={cls}>
+    <div style={style} className={cls} id={id}>
       {children}
     </div>
   )

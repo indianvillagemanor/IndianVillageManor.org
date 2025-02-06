@@ -15,10 +15,9 @@ export const metadata: Metadata = {
   description: "Indian Village Manor Condominiums in Detroit, Michigan",
 };
 
-const headerStyle = {
-  width: "100%",
-  height: "36px",
-}
+const contentStyle: React.CSSProperties = {
+  marginTop: '50px' // Add a top margin equal to the height of the header
+};
 
 export default function RootLayout({
   children,
@@ -31,9 +30,10 @@ export default function RootLayout({
       <body
         className={`${Noto.variable} antialiased`}
       >
-        <img src="/ivm_green.png" alt="ivm" style={headerStyle} />
         <SiteMenu />
-        {children}
+        <main style={contentStyle}>
+          {children}
+        </main>
       </body>
     </html>
   );
