@@ -2,13 +2,14 @@ import React, { ReactNode } from 'react'
 import GridCell from './grid_cell';
 
 interface GridHeaderProps {
-  gridArea: [number, number, number, number];
+  gridCell: [number, number, number, number];
+  portrait: boolean;
   children: ReactNode;
 }
 
-const GridHeader: React.FC<GridHeaderProps> = ({ gridArea, children }) => {
+const GridHeader: React.FC<GridHeaderProps> = ({ gridCell: gridArea, portrait, children }) => {
   return (
-    <GridCell gridArea={gridArea}>
+    <GridCell gridArea={gridArea} portrait={portrait}>
       <h1 style={{ fontSize: "clamp(1rem, 5vw, 4rem)" }}>
         {children}
       </h1>

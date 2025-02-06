@@ -11,9 +11,9 @@
   --grid-row-height: calc(var(--is-portrait) * 24px + var(--is-landscape) * (16px + 16px * (var(--aspect) - 1)));
 }
 
-.grid-row {
+/* .grid-row {
   height: var(--grid-row-height);
-}
+} */
 
 body {
   color: var(--foreground);

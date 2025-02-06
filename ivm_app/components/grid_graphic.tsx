@@ -2,16 +2,17 @@ import React from 'react'
 import GridCell from './grid_cell';
 
 interface GridGraphicProps {
-  gridArea: [number, number, number, number];
+  gridCell: [number, number, number, number];
   src: string;
   alt: string;
   zoomSrc?: string;
+  portrait: boolean;
 }
 
-const GridGraphic: React.FC<GridGraphicProps> = ({ gridArea, src, alt, zoomSrc }) => {
+const GridGraphic: React.FC<GridGraphicProps> = ({ gridCell: gridArea, src, alt, portrait, zoomSrc }) => {
 
   return (
-    <GridCell gridArea={gridArea}>
+    <GridCell gridArea={gridArea} portrait={portrait}>
       <img src={src} alt={alt} className="max-h-full max-w-full object-scale-down" />
     </GridCell>
   )

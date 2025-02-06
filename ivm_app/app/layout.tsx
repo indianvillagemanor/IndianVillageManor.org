@@ -40,10 +40,8 @@ export default function RootLayout({
       <body
         className={`${Noto.variable} antialiased`}
       >
-        <Aspect>
-          <img src="/ivm_green.png" alt="ivm" style={headerStyle} />
-          {children}
-        </Aspect>
+        <img src="/ivm_green.png" alt="ivm" style={headerStyle} />
+        {children}
       </body>
     </html>
   );

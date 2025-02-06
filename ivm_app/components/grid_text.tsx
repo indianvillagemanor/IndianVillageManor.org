@@ -2,13 +2,14 @@ import React, { ReactNode } from 'react'
 import GridCell from './grid_cell';
 
 interface GridTextProps {
-  gridArea: [number, number, number, number];
+  gridCell: [number, number, number, number];
+  portrait: boolean;
   children: ReactNode;
 }
 
-const GridText: React.FC<GridTextProps> = ({ gridArea, children }) => {
+const GridText: React.FC<GridTextProps> = ({ gridCell: gridArea, portrait, children }) => {
   return (
-    <GridCell gridArea={gridArea}>
+    <GridCell gridArea={gridArea} portrait={portrait}>
       <p className="overflow-hidden">
         {children}
       </p>
