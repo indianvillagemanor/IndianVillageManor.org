@@ -25,14 +25,14 @@ export default function Home() {
 
   return (
     <WindowContext.Provider value={{ portrait, rowHeight }}>
-      <GridSection rows={27}>
-        <GridGraphic gridCell={[1, 1, 6, 1]} src="IVM Logo Design_Black_24 0225_t.png" alt="IVM Logo" />
+      <GridSection rows={29}>
+        <GridGraphic gridCell={[1, 1, 7, 1]} src="IVM Logo Design_Black_24 0225_t.png" alt="IVM Logo" />
         <GridHeader gridCell={[1, 2, 2, 2]}>INDIAN VILLAGE MANOR</GridHeader>
-        <GridText gridCell={[8, 1, 8, 1]}>
+        <GridText gridCell={[9, 1, 9, 1]}>
           Experience spacious, elegant living at Indian Village Manor, a true gem on Detroit's Gold Coast Waterfront. Enjoy the beauty of the private riverfront park, stay in shape in the full featured gym, and get more out of life with proximity to Belle Isle park and a quick hop down Jefferson Avenue to Downtown Detroit.
         </GridText>
-        <GridPhoto gridCell={[4, 2, 23, 2]} src="Entrance.jpg" alt="IVM Entrance" />
-        <GridPhoto gridCell={[18, 1, 9, 1]} src="RiverfrontW.jpg" alt="IVM Riverfront West View" />
+        <GridPhoto gridCell={[4, 2, 26, 2]} src="Entrance.jpg" alt="IVM Entrance" />
+        <GridPhoto gridCell={[19, 1, 11, 1]} src="RiverfrontW.jpg" alt="IVM Riverfront West View" />
       </GridSection>
       <GridSection rows={23}>
         <GridPhoto gridCell={[1, 1, 23, 1]} src="Interior3.jpg" alt="IVM Interior #3" />
