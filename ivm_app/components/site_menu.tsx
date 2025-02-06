@@ -14,11 +14,8 @@ const menuStyle = {
 
 const overlayStyle = {
   position: "fixed" as const,
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  top: "36px",
+  right: 1,
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -26,9 +23,14 @@ const overlayStyle = {
 };
 
 const menuContentStyle = {
-  backgroundColor: "white",
+  backgroundColor: "#00693f",
+  color: "#f0f0f0",
   padding: "20px",
-  borderRadius: "8px",
+  borderBottomLeftRadius: "8px",
+  borderBottomRightRadius: "8px",
+  borderLeft: "1px solid #f0f0f0",
+  borderRight: "1px solid #f0f0f0",
+  borderBottom: "1px solid #f0f0f0",
 };
 
 
@@ -37,7 +39,6 @@ const headerStyle: React.CSSProperties = {
   justifyContent: 'space-between',
   alignItems: 'center',
   width: '100%',
-  // backgroundColor: '#fff',
   padding: '0px',
   paddingBottom: '1px',
   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -60,6 +61,10 @@ const SiteMenu = () => {
     setIsOpen(!isOpen);
   };
 
+  const closeMenu = () => {
+    setIsOpen(false);
+  }
+
   return (
     <header style={headerStyle}>
       <img src="/ivm_green.png" alt="ivm" style={headerImg} />
@@ -69,11 +74,10 @@ const SiteMenu = () => {
       {isOpen && (
         <div style={overlayStyle} onClick={toggleMenu}>
           <div style={menuContentStyle} onClick={(e) => e.stopPropagation()}>
-            <h2>Menu</h2>
             <ul>
-              <li><a href="#home">Home</a></li>
-              <li><a href="#floorplans">Floor Plans</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li><a href="#home" onClick={closeMenu}>Home</a></li>
+              <li><a href="#floorplans" onClick={closeMenu}>Floor Plans</a></li>
+              <li><a href="#contact" onClick={closeMenu}>Contact</a></li>
             </ul>
           </div>
         </div>
