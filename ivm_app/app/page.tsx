@@ -45,7 +45,7 @@ export default function Home() {
       <div style={{
         gridArea: "4 / 2 / 27 / 4"
       }} className="flex items-center justify-center overflow-hidden">
-        <img src="Entrance.jpg" alt="IVM Entrance" className="h-full w-full object-cover" />
+        <img src="Entrance.jpg" alt="IVM Entrance" className="h-full w-full object-cover rounded-xl" />
       </div>
       <div style={{
         gridArea: "7 / 1 / 18/ 2"
@@ -59,7 +59,7 @@ export default function Home() {
       <div style={{
         gridArea: "18 / 1 / 27 / 2"
       }} className="flex items-center justify-center overflow-hidden">
-        <img src="RiverfrontW.jpg" alt="IVM Riverfront West View" className="h-full w-full object-cover" />
+        <img src="RiverfrontW.jpg" alt="IVM Riverfront West View" className="h-full w-full object-cover rounded-xl" />
       </div>
     </div >
   );
