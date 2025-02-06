@@ -34,6 +34,20 @@ export default function Home() {
         <GridPhoto gridCell={[4, 2, 23, 2]} src="Entrance.jpg" alt="IVM Entrance" />
         <GridPhoto gridCell={[18, 1, 9, 1]} src="RiverfrontW.jpg" alt="IVM Riverfront West View" />
       </GridSection>
+      <GridSection rows={28}>
+        <GridPhoto gridCell={[1, 1, 24, 1]} src="Interior3.jpg" alt="IVM Interior #3" />
+        <GridText gridCell={[1, 2, 12, 2]}>
+          In the mid 1920s IVM advertisements used the phrase “Detroit’s Most Exclusive Apartment Building”.  A lot has happened since the building was converted into condos in 1998.  Many of the original common area elements remain. Each condo unit has taken on the identity of its owner.  Many walls have been literally removed and floor plans modified to efficiently utilize the spacious units. Some new kitchens and bathrooms have been installed. Other cosmetic changes have been made to address current needs, adding color, texture and features to make it feel like home.
+        </GridText>
+        <GridPhoto gridCell={[12, 2, 13, 2]} src="Interior1.jpg" alt="IVM Interior #1" />
+      </GridSection>
+      <GridSection rows={28} green>
+        <GridPhoto gridCell={[1, 1, 24, 1]} src="Interior3.jpg" alt="IVM Interior #3" />
+        <GridText gridCell={[1, 2, 12, 2]}>
+          In the mid 1920s IVM advertisements used the phrase “Detroit’s Most Exclusive Apartment Building”.  A lot has happened since the building was converted into condos in 1998.  Many of the original common area elements remain. Each condo unit has taken on the identity of its owner.  Many walls have been literally removed and floor plans modified to efficiently utilize the spacious units. Some new kitchens and bathrooms have been installed. Other cosmetic changes have been made to address current needs, adding color, texture and features to make it feel like home.
+        </GridText>
+        <GridPhoto gridCell={[12, 2, 13, 2]} src="Interior1.jpg" alt="IVM Interior #1" />
+      </GridSection>
     </WindowContext.Provider>
   );
 }
