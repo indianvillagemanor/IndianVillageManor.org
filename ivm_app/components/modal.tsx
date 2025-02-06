@@ -34,7 +34,7 @@ const Modal = () => {
         &times;
       </a>
 
-      <img id="modal-img" className="max-w-full max-h-full object-scale-down" />
+      <img id="modal-img" className="max-w-full max-h-full w-full h-full object-contain" />
     </div >)
 }
 

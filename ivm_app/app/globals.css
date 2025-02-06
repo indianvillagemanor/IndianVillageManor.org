@@ -16,10 +16,6 @@
   color: #f0f0f0;
 }
 
-/* .grid-row {
-  height: var(--grid-row-height);
-} */
-
 body {
   color: var(--foreground);
   background: var(--background);

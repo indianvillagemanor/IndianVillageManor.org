@@ -3,16 +3,7 @@ import { Noto_Serif } from "next/font/google";
 import "./globals.css";
 import { useEffect } from "react";
 import Aspect from "@/components/aspect";
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
+import SiteMenu from "@/components/site_menu";
 
 const Noto = Noto_Serif({
   variable: "--font-serif",
@@ -26,7 +17,7 @@ export const metadata: Metadata = {
 
 const headerStyle = {
   width: "100%",
-  height: "var(--grid-row-height)",
+  height: "36px",
 }
 
 export default function RootLayout({
@@ -41,6 +32,7 @@ export default function RootLayout({
         className={`${Noto.variable} antialiased`}
       >
         <img src="/ivm_green.png" alt="ivm" style={headerStyle} />
+        <SiteMenu />
         {children}
       </body>
     </html>
