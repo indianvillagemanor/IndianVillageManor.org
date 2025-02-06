@@ -6,13 +6,12 @@ interface GridGraphicProps {
   src: string;
   alt: string;
   zoomSrc?: string;
-  portrait: boolean;
 }
 
-const GridGraphic: React.FC<GridGraphicProps> = ({ gridCell: gridArea, src, alt, portrait, zoomSrc }) => {
+const GridGraphic: React.FC<GridGraphicProps> = ({ gridCell: gridArea, src, alt, zoomSrc }) => {
 
   return (
-    <GridCell gridArea={gridArea} portrait={portrait}>
+    <GridCell gridArea={gridArea}>
       <img src={src} alt={alt} className="max-h-full max-w-full object-scale-down" />
     </GridCell>
   )

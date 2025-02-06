@@ -1,13 +1,15 @@
+import { useContext } from "react";
+import { WindowContext } from "./window_context";
 
 
 interface GridCellProps {
   gridArea: [number, number, number, number];
-  portrait: boolean;
   children: React.ReactNode;
 }
 
 
-const GridCell: React.FC<GridCellProps> = ({ gridArea, portrait, children }) => {
+const GridCell: React.FC<GridCellProps> = ({ gridArea, children }) => {
+  const { portrait, rowHeight } = useContext(WindowContext);
   const [row, column, height, width] = gridArea;
   const style = portrait ?
     {
