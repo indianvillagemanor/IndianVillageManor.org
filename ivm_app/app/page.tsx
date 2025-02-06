@@ -6,6 +6,7 @@ import GridHeader from "@/components/grid_header";
 import GridPhoto from "@/components/grid_photo";
 import GridSection from "@/components/grid_section";
 import GridText from "@/components/grid_text";
+import Modal from "@/components/modal";
 import { WindowContext } from "@/components/window_context";
 import Image from "next/image";
 import { useState } from "react";
@@ -50,12 +51,12 @@ export default function Home() {
         <GridPhoto gridCell={[14, 2, 10, 2]} src="RiverfrontE.jpg" alt="IVM Riverfront East View" />
       </GridSection>
       <GridSection rows={22} green>
-        <GridGraphic gridCell={[6, 1, 12, 1]} src="FloorPlanABMN_white.png" alt="IVM Floor Plan for A,B,M and N units" />
+        <GridGraphic gridCell={[6, 1, 12, 1]} src="FloorPlanABMN_white.png" alt="IVM Floor Plan for A,B,M and N units" zoom />
         <GridText gridCell={[1, 2, 12, 1]}>
           These well appointed and maintained condominiums offer 3 distinct layouts (2,300-2,500 sq. ft. 11 room maximum). Each unit expresses a variety of different tastes and styles yet maintain the original architectural charm.
         </GridText>
-        <GridGraphic gridCell={[1, 3, 12, 1]} src="FloorPlanCDKL_white.png" alt="IVM Floor Plan for C,D,K and L units" />
-        <GridGraphic gridCell={[13, 2, 12, 2]} src="FloorPlanEFGH_white.png" alt="IVM Floor Plan for E,F,G and H units" />
+        <GridGraphic gridCell={[1, 3, 12, 1]} src="FloorPlanCDKL_white.png" alt="IVM Floor Plan for C,D,K and L units" zoom />
+        <GridGraphic gridCell={[13, 2, 12, 2]} src="FloorPlanEFGH_white.png" alt="IVM Floor Plan for E,F,G and H units" zoom />
       </GridSection>
       <GridSection rows={24} green>
         <GridPhoto gridCell={[1, 1, 10, 1]} src="Interior5.jpg" alt="IVM Interior #5" />
@@ -75,6 +76,7 @@ export default function Home() {
           <a href="mailto:IVManor@outlook.com">IVManor@outlook.com</a>
         </GridText>
       </GridSection>
+      <Modal />
     </WindowContext.Provider>
   );
 }
