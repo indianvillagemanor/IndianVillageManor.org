@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #E5E3DC;
   --foreground: #171717;
   --aspect: 1.7778;
   --is-landscape: calc(min(1, max(0, round(down, var(--aspect), 1))));
@@ -15,15 +15,18 @@
   height: var(--grid-row-height);
 }
 
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
-
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  font-family: 'Noto Serif', serif;
+  font-weight: 300;
+}
+
+p {
+  font-family: 'Noto Serif', serif;
+  font-weight: 600;
 }

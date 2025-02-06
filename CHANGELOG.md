@@ -1,3 +1,6 @@
+### first section grid layout for landscape
+- matching current squarespace first section appropriately for wide displays
+
 ### started ivm\_app 
 - create-next-app and node v22.13.1
 
