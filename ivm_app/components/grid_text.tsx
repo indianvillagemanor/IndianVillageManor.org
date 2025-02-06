@@ -1,10 +1,18 @@
 import React, { ReactNode } from 'react'
+import GridCell from './grid_cell';
 
-const GridText = ({ children }: { children: ReactNode }) => {
+interface GridTextProps {
+  gridArea: [number, number, number, number];
+  children: ReactNode;
+}
+
+const GridText: React.FC<GridTextProps> = ({ gridArea, children }) => {
   return (
-    <p className="overflow-hidden">
-      {children}
-    </p>
+    <GridCell gridArea={gridArea}>
+      <p className="overflow-hidden">
+        {children}
+      </p>
+    </GridCell>
   )
 }
 
