@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { WindowContext } from "./window_context";
 
 
@@ -11,7 +11,7 @@ interface GridCellProps {
 const GridCell: React.FC<GridCellProps> = ({ gridArea, children }) => {
   const { portrait, rowHeight } = useContext(WindowContext);
   const [row, column, height, width] = gridArea;
-  const style = portrait ?
+  const style1 = portrait ?
     {
       gridArea: `auto / auto / span ${height} / span 1`
     } :
@@ -19,8 +19,17 @@ const GridCell: React.FC<GridCellProps> = ({ gridArea, children }) => {
       gridArea: `${row} / ${column} / ${row + height} / ${column + width}`
     }
 
+  const seed = (row + column * 10 + height * 100 + width * 1000);
+  const seededRandom = (seed: number) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const debug = false;
+  const style = debug ? { ...style1, backgroundColor: `#${Math.floor(seededRandom(seed) * 16777215).toString(16).padStart(6, '0')}` } : style1;
+
   return (
-    <div style={style} className="flex items-center justify-center">
+    <div style={{ ...style }} className="flex items-center justify-center">
       {children}
     </div>
   )

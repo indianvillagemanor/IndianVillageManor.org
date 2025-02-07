@@ -19,7 +19,7 @@ const overlayStyle = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  zIndex: 1000,
+  zIndex: 50,
 };
 
 const menuContentStyle = {
@@ -45,7 +45,7 @@ const headerStyle: React.CSSProperties = {
   position: 'fixed',
   top: 0,
   left: 0,
-  zIndex: 1000
+  zIndex: 50
 };
 
 const headerImg = {

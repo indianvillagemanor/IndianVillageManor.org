@@ -27,7 +27,8 @@ export const showModal = (src: string) => {
 const Modal = () => {
   return (
     <div id="modal"
-      className="hidden fixed top-0 left-0 z-80 w-screen h-screen bg-black/90 justify-center items-center">
+      className="hidden fixed top-0 left-0 w-screen h-screen bg-black/90 justify-center items-center"
+      style={{ zIndex: 80 }}>
 
       <a className="fixed z-90 top-6 right-8 text-white text-5xl font-bold"
         onClick={closeModal}>
