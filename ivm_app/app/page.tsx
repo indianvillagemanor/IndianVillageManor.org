@@ -36,14 +36,14 @@ export default function Home() {
     <WindowContext.Provider value={{ portrait, rowHeight }}>
       <Modal src={modalSrc} onClose={() => setModalSrc(undefined)} />
 
-      <GridSection rows={33} id="home">
+      <GridSection rows={34} id="home">
         <GridGraphic gridCell={[1, 1, 8, 1]} src="/IVM Logo Design_Black_24 0225_t.png" alt="IVM Logo" />
-        <GridHeader gridCell={[1, 2, 3, 2]}>INDIAN VILLAGE MANOR</GridHeader>
+        <GridHeader gridCell={[1, 2, 4, 2]}>INDIAN VILLAGE MANOR</GridHeader>
         <GridText gridCell={[9, 1, 12, 1]} >
           Experience spacious, elegant living at Indian Village Manor, a true gem on Detroit&#39;s Gold Coast Waterfront. Enjoy the beauty of the private riverfront park, stay in shape in the full featured gym, and get more out of life with proximity to Belle Isle park and a quick hop down Jefferson Avenue to Downtown Detroit.
         </GridText>
-        <GridPhoto gridCell={[4, 2, 29, 2]} src="/Entrance.jpg" alt="IVM Entrance" loading="eager" />
-        <GridPhoto gridCell={[21, 1, 12, 1]} src="/RiverfrontW.jpg" alt="IVM Riverfront West View" />
+        <GridPhoto gridCell={[5, 2, 29, 2]} src="/Entrance.jpg" alt="IVM Entrance" loading="eager" />
+        <GridPhoto gridCell={[21, 1, 13, 1]} src="/RiverfrontW.jpg" alt="IVM Riverfront West View" />
       </GridSection>
 
       <GridSection rows={24} id="interiors1">
@@ -64,10 +64,10 @@ export default function Home() {
       </GridSection>
 
       <GridSection rows={23} green id="floorplans">
-        <GridGraphic gridCell={[1, 1, 14, 1]} src="/FloorPlanABMN_white.png" alt="IVM Floor Plan for A,B,M and N units" onZoom={setModalSrc} />
         <GridText gridCell={[1, 2, 14, 1]}>
           These well appointed and maintained condominiums offer 3 distinct layouts (2,300-2,500 sq. ft. 11 room maximum). Each unit expresses a variety of different tastes and styles yet maintain the original architectural charm.
         </GridText>
+        <GridGraphic gridCell={[1, 1, 14, 1]} src="/FloorPlanABMN_white.png" alt="IVM Floor Plan for A,B,M and N units" onZoom={setModalSrc} />
         <GridGraphic gridCell={[1, 3, 14, 1]} src="/FloorPlanCDKL_white.png" alt="IVM Floor Plan for C,D,K and L units" onZoom={setModalSrc} />
         <GridGraphic gridCell={[15, 1, 9, 3]} src="/FloorPlanEFGH_white.png" alt="IVM Floor Plan for E,F,G and H units" onZoom={setModalSrc} />
       </GridSection>

@@ -13,13 +13,13 @@ interface GridPhotoProps {
 
 
 const GridPhoto: React.FC<GridPhotoProps> = ({ gridCell: gridArea, src, alt, loading }) => {
-  const { portrait } = useContext(WindowContext)
+  const { rowHeight } = useContext(WindowContext)
 
   const sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
   const priority = loading === "eager"
 
   return (
-    <GridCell gridArea={gridArea} fixedHeight={portrait}>
+    <GridCell gridArea={gridArea} fixedHeight={rowHeight * 24}>
       <Image
         src={src}
         alt={alt}

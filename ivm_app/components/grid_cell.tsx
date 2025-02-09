@@ -4,7 +4,7 @@ import { WindowContext } from "./window_context";
 
 interface GridCellProps {
   gridArea: [number, number, number, number];
-  fixedHeight?: boolean;
+  fixedHeight?: boolean | number;
   children: React.ReactNode;
 }
 
@@ -26,7 +26,13 @@ const GridCell: React.FC<GridCellProps> = ({ gridArea, fixedHeight, children }) 
     position: "relative",
   }
 
-  const flowStyle = fixedHeight ? { height: `${height * rowHeight}px` } : {}
+  const flowStyle = fixedHeight
+    ? ((typeof fixedHeight === 'boolean')
+      ? { height: `${height * rowHeight}px` }
+      : { height: `${fixedHeight}px` })
+    : {}
+
+  // { height: `${height * rowHeight}px` } : {}
   const gridStyle = {
     gridRowStart: row,
     gridColumnStart: column,
