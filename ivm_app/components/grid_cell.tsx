@@ -14,11 +14,9 @@ const GridCell: React.FC<GridCellProps> = ({ gridArea, children }) => {
   const style1 = portrait ?
     {
       gridArea: `auto / auto / span ${height} / span 1`,
-      position: "relative"
     } :
     {
       gridArea: `${row} / ${column} / ${row + height} / ${column + width}`,
-      position: "relative"
     }
 
   const seed = (row + column * 10 + height * 100 + width * 1000);
@@ -31,7 +29,7 @@ const GridCell: React.FC<GridCellProps> = ({ gridArea, children }) => {
   const style = debug ? { ...style1, backgroundColor: `#${Math.floor(seededRandom(seed) * 16777215).toString(16).padStart(6, '0')}` } : style1;
 
   return (
-    <div style={{ ...style }} className="flex items-center justify-center">
+    <div style={{ ...style }} className="relative flex items-center justify-center">
       {children}
     </div>
   )
