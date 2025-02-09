@@ -32,7 +32,6 @@ const GridCell: React.FC<GridCellProps> = ({ gridArea, fixedHeight, children }) 
       : { height: `${fixedHeight}px` })
     : {}
 
-  // { height: `${height * rowHeight}px` } : {}
   const gridStyle = {
     gridRowStart: row,
     gridColumnStart: column,

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import ivmGreen from "@/public/ivm_green.png"
 
 const menuStyle = {
   position: "absolute" as const,
@@ -67,7 +69,10 @@ const SiteMenu = () => {
 
   return (
     <header style={headerStyle}>
-      <img src="/ivm_green.png" alt="ivm" style={headerImg} />
+      <Image
+        src={ivmGreen}
+        alt="ivm"
+        style={headerImg} />
       <div style={menuStyle} onClick={toggleMenu} >
         &#9776; Menu
       </div>
