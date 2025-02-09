@@ -10,18 +10,17 @@ interface GridGraphicProps {
 }
 
 const GridGraphic: React.FC<GridGraphicProps> = ({ gridCell: gridArea, src, alt, onZoom }) => {
-
-  const { portrait, rowHeight } = useContext(WindowContext);
-
-  const hClass = portrait ? "max-h-full" : "h-full";
-  const hStyle = portrait ? { height: `${rowHeight * gridArea[2]}px` } : {}
   const onClick = onZoom ? { onClick: () => onZoom(src) } : {}
 
+  const { portrait, rowHeight } = useContext(WindowContext);
+  const [row, column, height, width] = gridArea;
+
   return (
-    <GridCell gridArea={gridArea}>
+    <GridCell gridArea={gridArea} fixedHeight={portrait}>
+      {/* <GridCell gridArea={gridArea} fixedHeight={portrait ? (height * rowHeight) : undefined}> */}
       <img src={src} alt={alt}
-        className={hClass + " max-w-full object-scale-down"}
-        style={hStyle}
+        className="h-full max-w-full object-scale-down"
+        style={{ display: "block", margin: "auto" }}
         {...onClick}
       />
     </GridCell>

@@ -38,7 +38,7 @@ export default function Home() {
 
       <GridSection rows={33} id="home">
         <GridGraphic gridCell={[1, 1, 8, 1]} src="/IVM Logo Design_Black_24 0225_t.png" alt="IVM Logo" />
-        <GridHeader gridCell={[1, 2, 2, 2]}>INDIAN VILLAGE MANOR</GridHeader>
+        <GridHeader gridCell={[1, 2, 3, 2]}>INDIAN VILLAGE MANOR</GridHeader>
         <GridText gridCell={[9, 1, 12, 1]} >
           Experience spacious, elegant living at Indian Village Manor, a true gem on Detroit&#39;s Gold Coast Waterfront. Enjoy the beauty of the private riverfront park, stay in shape in the full featured gym, and get more out of life with proximity to Belle Isle park and a quick hop down Jefferson Avenue to Downtown Detroit.
         </GridText>

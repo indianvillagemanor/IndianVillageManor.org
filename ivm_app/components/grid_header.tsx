@@ -1,6 +1,5 @@
-import React, { ReactNode, useContext } from 'react'
+import React, { ReactNode } from 'react'
 import GridCell from './grid_cell';
-import { WindowContext } from './window_context';
 
 interface GridHeaderProps {
   gridCell: [number, number, number, number];
@@ -8,15 +7,12 @@ interface GridHeaderProps {
 }
 
 const GridHeader: React.FC<GridHeaderProps> = ({ gridCell: gridArea, children }) => {
-  const { portrait } = useContext(WindowContext);
-
-  const fontSize = portrait ? "clamp(1rem, 7vw, 4rem)" : "clamp(1rem, 5vw, 6rem)";
   return (
     <GridCell gridArea={gridArea}>
-      <h1 style={{ fontSize }}>
+      <h1 className={"text-4xl lg:text-5xl xl:text-6xl grid place-items-center h-full"}>
         {children}
       </h1>
-    </GridCell>
+    </GridCell >
   )
 }
 

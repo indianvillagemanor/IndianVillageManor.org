@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Image from 'next/image'
 import GridCell from './grid_cell';
+import { WindowContext } from './window_context';
 
 
 interface GridPhotoProps {
@@ -12,16 +13,18 @@ interface GridPhotoProps {
 
 
 const GridPhoto: React.FC<GridPhotoProps> = ({ gridCell: gridArea, src, alt, loading }) => {
+  const { portrait } = useContext(WindowContext)
+
   const sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
   const priority = loading === "eager"
 
   return (
-    <GridCell gridArea={gridArea}>
+    <GridCell gridArea={gridArea} fixedHeight={portrait}>
       <Image
         src={src}
         alt={alt}
         fill={true}
-        className="h-full w-full object-cover rounded-xl p-1"
+        className={"h-full max-w-full object-cover rounded-xl"}
         sizes={sizes}
         loading={"eager"}
         priority={priority}

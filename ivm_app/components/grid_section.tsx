@@ -10,21 +10,21 @@ interface GridSectionProps {
 
 const GridSection = ({ rows, id, green, children }: GridSectionProps) => {
   const { portrait, rowHeight } = useContext(WindowContext);
-  const aspectColumns = portrait ? 1 : 3
-  const gridStyle =
+  const gridStyle: React.CSSProperties =
   {
     display: "grid",
-    gridTemplateColumns: `repeat(${aspectColumns}, minmax(0, 1fr))`,
+    gridTemplateColumns: `repeat(3, minmax(0, 1fr))`,
     gridTemplateRows: `repeat(${rows}, ${rowHeight}px)`,
-    gridGap: "2px",
+    gridGap: "4px",
     padding: "8px",
   }
 
-
-  const flowStyle = {
-    display: "block",
-    width: "100%",
-    padding: "4px",
+  const flowStyle: React.CSSProperties =
+  {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    padding: "8px",
   }
 
   const style = portrait ? flowStyle : gridStyle

@@ -47,8 +47,7 @@ const Modal: React.FC<ModalProps> = ({ src, onClose }) => {
         src={src || "/favicon.ico"}
         fill={true}
         alt={src || "zoomed-in image"}
-        object-fit="contain"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        style={{ objectFit: "contain" }}
       />
     </div >)
 }

@@ -11,7 +11,7 @@ const GridText: React.FC<GridTextProps> = ({ gridCell: gridArea, className, chil
   const additionalClasses = className ? (" " + className) : "";
   return (
     <GridCell gridArea={gridArea}>
-      <p className={"text-sm lg:text-lg xl:text-xl overflow-hidden p-1" + additionalClasses}>
+      <p className={"grid place-items-center h-full text-sm md:text-md lg:text-lg xl:text-lg overflow-hidden p-1" + additionalClasses}>
         {children}
       </p>
     </GridCell>
