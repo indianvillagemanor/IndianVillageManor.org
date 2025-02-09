@@ -8,32 +8,32 @@ import GridText from "@/components/grid_text";
 import Modal from "@/components/modal";
 import { WindowContext } from "@/components/window_context";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface WindowSize {
   width: number;
   height: number;
 }
 
-const getWindowSize = (): WindowSize => ({
-  width: window.innerWidth,
-  height: window.innerHeight
-});
-
 export default function Home() {
 
-  const [windowSize, setWindowSize] = useState<WindowSize>(getWindowSize());
+  const [windowSize, setWindowSize] = useState<WindowSize>();
+  const [modalSrc, setModalSrc] = useState<string | undefined>();
 
-  window.addEventListener("resize", () => {
-    setWindowSize(getWindowSize());
-  });
+  const updateWindowSize = () => {
+    setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+  }
 
-  const portrait = windowSize.width <= 768;
-  const rowHeight = portrait ? 16 : (16 + 16 * (windowSize.width - 768) / 1152);
+  useEffect(updateWindowSize, []);
+
+  window.addEventListener("resize", updateWindowSize);
+
+  const portrait = windowSize ? windowSize.width <= 768 : false;
+  const rowHeight = windowSize ? (portrait ? 16 : (16 + 16 * (windowSize.width - 768) / 1152)) : 16;
 
   return (
     <WindowContext.Provider value={{ portrait, rowHeight }}>
-      <Modal />
+      <Modal src={modalSrc} onClose={() => setModalSrc(undefined)} />
 
       <GridSection rows={33} id="home">
         <GridGraphic gridCell={[1, 1, 8, 1]} src="IVM Logo Design_Black_24 0225_t.png" alt="IVM Logo" />
@@ -47,10 +47,10 @@ export default function Home() {
 
       <GridSection rows={24} id="interiors1">
         <GridPhoto gridCell={[1, 1, 24, 1]} src="Interior3.jpg" alt="IVM Interior #3" />
-        <GridText gridCell={[1, 2, 12, 2]}>
+        <GridText gridCell={[1, 2, 10, 2]}>
           In the mid 1920s IVM advertisements used the phrase “Detroit’s Most Exclusive Apartment Building”.  A lot has happened since the building was converted into condos in 1998.  Many of the original common area elements remain. Each condo unit has taken on the identity of its owner.  Many walls have been literally removed and floor plans modified to efficiently utilize the spacious units. Some new kitchens and bathrooms have been installed. Other cosmetic changes have been made to address current needs, adding color, texture and features to make it feel like home.
         </GridText>
-        <GridPhoto gridCell={[13, 2, 12, 2]} src="Interior1.jpg" alt="IVM Interior #1" />
+        <GridPhoto gridCell={[11, 2, 14, 2]} src="Interior1.jpg" alt="IVM Interior #1" />
       </GridSection>
 
       <GridSection rows={27} green id="amenities">
@@ -62,20 +62,20 @@ export default function Home() {
         <GridPhoto gridCell={[15, 2, 13, 2]} src="RiverfrontE.jpg" alt="IVM Riverfront East View" />
       </GridSection>
 
-      <GridSection rows={20} green id="floorplans">
-        <GridGraphic gridCell={[1, 1, 20, 1]} src="FloorPlanABMN_white.png" alt="IVM Floor Plan for A,B,M and N units" zoom />
-        <GridText gridCell={[1, 2, 11, 1]}>
+      <GridSection rows={23} green id="floorplans">
+        <GridGraphic gridCell={[1, 1, 14, 1]} src="FloorPlanABMN_white.png" alt="IVM Floor Plan for A,B,M and N units" onZoom={setModalSrc} />
+        <GridText gridCell={[1, 2, 14, 1]}>
           These well appointed and maintained condominiums offer 3 distinct layouts (2,300-2,500 sq. ft. 11 room maximum). Each unit expresses a variety of different tastes and styles yet maintain the original architectural charm.
         </GridText>
-        <GridGraphic gridCell={[1, 3, 11, 1]} src="FloorPlanCDKL_white.png" alt="IVM Floor Plan for C,D,K and L units" zoom />
-        <GridGraphic gridCell={[12, 2, 9, 3]} src="FloorPlanEFGH_white.png" alt="IVM Floor Plan for E,F,G and H units" zoom />
+        <GridGraphic gridCell={[1, 3, 14, 1]} src="FloorPlanCDKL_white.png" alt="IVM Floor Plan for C,D,K and L units" onZoom={setModalSrc} />
+        <GridGraphic gridCell={[15, 1, 9, 3]} src="FloorPlanEFGH_white.png" alt="IVM Floor Plan for E,F,G and H units" onZoom={setModalSrc} />
       </GridSection>
 
-      <GridSection rows={24} green id="interiors2">
-        <GridPhoto gridCell={[1, 1, 10, 1]} src="Interior5.jpg" alt="IVM Interior #5" />
-        <GridPhoto gridCell={[1, 2, 10, 2]} src="Interior6.jpg" alt="IVM Interior #6" />
-        <GridPhoto gridCell={[11, 1, 14, 2]} src="Interior4.jpg" alt="IVM Interior #4" />
-        <GridPhoto gridCell={[11, 3, 14, 1]} src="Exterior.jpg" alt="IVM Front Exterior" />
+      <GridSection rows={28} green id="interiors2">
+        <GridPhoto gridCell={[1, 1, 14, 1]} src="Interior5.jpg" alt="IVM Interior #5" />
+        <GridPhoto gridCell={[1, 2, 14, 2]} src="Interior6.jpg" alt="IVM Interior #6" />
+        <GridPhoto gridCell={[15, 1, 14, 2]} src="Interior4.jpg" alt="IVM Interior #4" />
+        <GridPhoto gridCell={[15, 3, 14, 1]} src="Exterior.jpg" alt="IVM Front Exterior" />
       </GridSection>
 
       <GridSection rows={20} id="contact">

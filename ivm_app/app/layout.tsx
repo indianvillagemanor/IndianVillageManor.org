@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Serif } from "next/font/google";
 import "./globals.css";
-import { useEffect } from "react";
-import Aspect from "@/components/aspect";
 import SiteMenu from "@/components/site_menu";
 
 const Noto = Noto_Serif({
