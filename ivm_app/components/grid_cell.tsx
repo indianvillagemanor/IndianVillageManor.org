@@ -1,13 +1,11 @@
 import { CSSProperties, useContext } from "react";
 import { WindowContext } from "./window_context";
 
-
 interface GridCellProps {
   gridArea: [number, number, number, number];
   fixedHeight?: boolean | number;
   children: React.ReactNode;
 }
-
 
 const GridCell: React.FC<GridCellProps> = ({ gridArea, fixedHeight, children }) => {
   const { portrait, rowHeight } = useContext(WindowContext);
@@ -32,7 +30,6 @@ const GridCell: React.FC<GridCellProps> = ({ gridArea, fixedHeight, children }) 
       : { height: `${fixedHeight}px` })
     : {}
 
-  // { height: `${height * rowHeight}px` } : {}
   const gridStyle = {
     gridRowStart: row,
     gridColumnStart: column,

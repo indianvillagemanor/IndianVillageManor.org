@@ -1,4 +1,5 @@
-import React, { useContext } from 'react'
+import React, { useContext } from 'react';
+import Image from 'next/image';
 import GridCell from './grid_cell';
 import { WindowContext } from './window_context';
 
@@ -16,9 +17,9 @@ const GridGraphic: React.FC<GridGraphicProps> = ({ gridCell: gridArea, src, alt,
 
   return (
     <GridCell gridArea={gridArea} fixedHeight={portrait}>
-      {/* <GridCell gridArea={gridArea} fixedHeight={portrait ? (height * rowHeight) : undefined}> */}
-      <img src={src} alt={alt}
+      <Image src={src} alt={alt}
         className="h-full max-w-full object-scale-down"
+        fill
         style={{ display: "block", margin: "auto" }}
         {...onClick}
       />
