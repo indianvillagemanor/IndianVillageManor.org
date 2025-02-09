@@ -37,14 +37,19 @@ const Modal: React.FC<ModalProps> = ({ src, onClose }) => {
   return (
     <div id="modal"
       className={modalVisibility + " fixed top-0 left-0 w-screen h-screen bg-black/90 justify-center items-center"}
-      style={{ zIndex: 80 }}>
+      style={{ zIndex: 80, position: "fixed" }}>
 
       <a className="fixed z-90 top-6 right-8 text-white text-5xl font-bold"
         onClick={onClose}>
         &times;
       </a>
-      <Image src={src || ""} alt={src || "zoomed-in image"} objectFit="contain" />
-      {/* className="max-w-full max-h-full w-full h-full object-contain" /> */}
+      <Image
+        src={src || "/favicon.ico"}
+        fill={true}
+        alt={src || "zoomed-in image"}
+        object-fit="contain"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
     </div >)
 }
 

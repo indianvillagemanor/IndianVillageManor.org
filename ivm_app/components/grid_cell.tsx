@@ -13,10 +13,12 @@ const GridCell: React.FC<GridCellProps> = ({ gridArea, children }) => {
   const [row, column, height, width] = gridArea;
   const style1 = portrait ?
     {
-      gridArea: `auto / auto / span ${height} / span 1`
+      gridArea: `auto / auto / span ${height} / span 1`,
+      position: "relative"
     } :
     {
-      gridArea: `${row} / ${column} / ${row + height} / ${column + width}`
+      gridArea: `${row} / ${column} / ${row + height} / ${column + width}`,
+      position: "relative"
     }
 
   const seed = (row + column * 10 + height * 100 + width * 1000);
