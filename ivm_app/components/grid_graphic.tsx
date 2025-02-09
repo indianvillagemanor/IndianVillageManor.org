@@ -12,8 +12,7 @@ interface GridGraphicProps {
 const GridGraphic: React.FC<GridGraphicProps> = ({ gridCell: gridArea, src, alt, onZoom }) => {
   const onClick = onZoom ? { onClick: () => onZoom(src) } : {}
 
-  const { portrait, rowHeight } = useContext(WindowContext);
-  const [row, column, height, width] = gridArea;
+  const { portrait } = useContext(WindowContext);
 
   return (
     <GridCell gridArea={gridArea} fixedHeight={portrait}>
