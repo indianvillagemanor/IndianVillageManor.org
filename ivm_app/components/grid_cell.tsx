@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useContext } from "react";
 import { WindowContext } from "./window_context";
 
 
@@ -9,7 +9,7 @@ interface GridCellProps {
 
 
 const GridCell: React.FC<GridCellProps> = ({ gridArea, children }) => {
-  const { portrait, rowHeight } = useContext(WindowContext);
+  const { portrait } = useContext(WindowContext);
   const [row, column, height, width] = gridArea;
   const style1 = portrait ?
     {

@@ -7,7 +7,6 @@ import GridSection from "@/components/grid_section";
 import GridText from "@/components/grid_text";
 import Modal from "@/components/modal";
 import { WindowContext } from "@/components/window_context";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface WindowSize {
@@ -24,9 +23,11 @@ export default function Home() {
     setWindowSize({ width: window.innerWidth, height: window.innerHeight });
   }
 
-  useEffect(updateWindowSize, []);
-
-  window.addEventListener("resize", updateWindowSize);
+  useEffect(() => {
+    updateWindowSize();
+    window.addEventListener("resize", updateWindowSize);
+    return () => window.removeEventListener("resize", updateWindowSize);
+  }, []);
 
   const portrait = windowSize ? windowSize.width <= 768 : false;
   const rowHeight = windowSize ? (portrait ? 16 : (16 + 16 * (windowSize.width - 768) / 1152)) : 16;
@@ -39,7 +40,7 @@ export default function Home() {
         <GridGraphic gridCell={[1, 1, 8, 1]} src="IVM Logo Design_Black_24 0225_t.png" alt="IVM Logo" />
         <GridHeader gridCell={[1, 2, 2, 2]}>INDIAN VILLAGE MANOR</GridHeader>
         <GridText gridCell={[9, 1, 12, 1]} >
-          Experience spacious, elegant living at Indian Village Manor, a true gem on Detroit's Gold Coast Waterfront. Enjoy the beauty of the private riverfront park, stay in shape in the full featured gym, and get more out of life with proximity to Belle Isle park and a quick hop down Jefferson Avenue to Downtown Detroit.
+          Experience spacious, elegant living at Indian Village Manor, a true gem on Detroit&#39;s Gold Coast Waterfront. Enjoy the beauty of the private riverfront park, stay in shape in the full featured gym, and get more out of life with proximity to Belle Isle park and a quick hop down Jefferson Avenue to Downtown Detroit.
         </GridText>
         <GridPhoto gridCell={[4, 2, 29, 2]} src="Entrance.jpg" alt="IVM Entrance" />
         <GridPhoto gridCell={[21, 1, 12, 1]} src="RiverfrontW.jpg" alt="IVM Riverfront West View" />
