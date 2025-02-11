@@ -1,10 +1,10 @@
 "use client";
 
-import GridGraphic from "@/components/grid_graphic";
-import GridHeader from "@/components/grid_header";
-import GridPhoto from "@/components/grid_photo";
-import GridSection from "@/components/grid_section";
-import GridText from "@/components/grid_text";
+import GridGraphic from "@/components/grid/grid_graphic";
+import GridHeader from "@/components/grid/grid_header";
+import GridPhoto from "@/components/grid/grid_photo";
+import GridSection from "@/components/grid/grid_section";
+import GridText from "@/components/grid/grid_text";
 import Modal from "@/components/modal";
 import React, { useState } from "react";
 

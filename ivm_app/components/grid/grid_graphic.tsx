@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import Image from 'next/image';
 import GridCell from './grid_cell';
-import { WindowContext } from './window_context';
+import { WindowContext } from '../window_context';
 
 interface GridGraphicProps {
   gridCell: [number, number, number, number];

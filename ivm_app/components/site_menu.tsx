@@ -97,9 +97,9 @@ const SiteMenu = () => {
                     <li><a href="/newsletter" onClick={closeMenu}>Newsletter</a></li>
                     <li><a href="/tickets" onClick={closeMenu}>Tickets</a></li>
                     <li><hr /></li>
-                    <li><a href="/logout" onClick={closeMenu}>Logout</a></li>
+                    <li><a href="/auth/logout" onClick={closeMenu}>Logout</a></li>
                   </>
-                  : <li><a href="/login" onClick={closeMenu}>Login</a></li>
+                  : <li><a href="/auth/login" onClick={closeMenu}>Login</a></li>
               }
             </ul>
           </div>

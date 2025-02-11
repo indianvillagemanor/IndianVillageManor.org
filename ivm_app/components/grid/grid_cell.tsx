@@ -1,5 +1,5 @@
 import { CSSProperties, useContext } from "react";
-import { WindowContext } from "./window_context";
+import { WindowContext } from "../window_context";
 
 interface GridCellProps {
   gridArea: [number, number, number, number];

@@ -1,5 +1,5 @@
 import React, { ReactNode, useContext } from 'react'
-import { WindowContext } from './window_context';
+import { WindowContext } from '../window_context';
 
 interface GridSectionProps {
   rows: number;
