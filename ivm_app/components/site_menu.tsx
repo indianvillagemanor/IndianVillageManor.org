@@ -67,12 +67,17 @@ const SiteMenu = () => {
     setIsOpen(false);
   }
 
+  const loggedIn = false;
+
   return (
     <header style={headerStyle}>
       <Image
         src={ivmGreen}
         alt="ivm"
-        style={headerImg} />
+        style={headerImg}
+        priority
+        sizes="100vw"
+      />
       <div style={menuStyle} onClick={toggleMenu} >
         &#9776; Menu
       </div>
@@ -80,14 +85,28 @@ const SiteMenu = () => {
         <div style={overlayStyle} onClick={toggleMenu}>
           <div style={menuContentStyle} onClick={(e) => e.stopPropagation()}>
             <ul>
-              <li><a href="#home" onClick={closeMenu}>Home</a></li>
-              <li><a href="#floorplans" onClick={closeMenu}>Floor Plans</a></li>
-              <li><a href="#contact" onClick={closeMenu}>Contact</a></li>
+              <li><a href="/#home" onClick={closeMenu}>Home</a></li>
+              <li><a href="/#floorplans" onClick={closeMenu}>Floor Plans</a></li>
+              <li><a href="/#contact" onClick={closeMenu}>Contact</a></li>
+              <li><hr /></li>
+              {
+                loggedIn
+                  ?
+                  <>
+                    <li><a href="/calendar" onClick={closeMenu}>Calendar</a></li>
+                    <li><a href="/newsletter" onClick={closeMenu}>Newsletter</a></li>
+                    <li><a href="/tickets" onClick={closeMenu}>Tickets</a></li>
+                    <li><hr /></li>
+                    <li><a href="/logout" onClick={closeMenu}>Logout</a></li>
+                  </>
+                  : <li><a href="/login" onClick={closeMenu}>Login</a></li>
+              }
             </ul>
           </div>
         </div>
-      )}
-    </header>
+      )
+      }
+    </header >
   );
 }
 

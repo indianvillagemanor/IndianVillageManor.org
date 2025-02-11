@@ -3,17 +3,18 @@ import { WindowContext } from './window_context';
 
 interface GridSectionProps {
   rows: number;
+  cols?: number;
   green?: boolean;
   id?: string;
   children: ReactNode;
 }
 
-const GridSection = ({ rows, id, green, children }: GridSectionProps) => {
+const GridSection = ({ rows, cols, id, green, children }: GridSectionProps) => {
   const { portrait, rowHeight } = useContext(WindowContext);
   const gridStyle: React.CSSProperties =
   {
     display: "grid",
-    gridTemplateColumns: `repeat(3, minmax(0, 1fr))`,
+    gridTemplateColumns: `repeat(${cols || 3}, minmax(0, 1fr))`,
     gridTemplateRows: `repeat(${rows}, ${rowHeight}px)`,
     gridGap: "4px",
     padding: "8px",

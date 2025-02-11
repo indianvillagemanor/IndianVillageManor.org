@@ -6,34 +6,14 @@ import GridPhoto from "@/components/grid_photo";
 import GridSection from "@/components/grid_section";
 import GridText from "@/components/grid_text";
 import Modal from "@/components/modal";
-import { WindowContext } from "@/components/window_context";
-import { useEffect, useState } from "react";
-
-interface WindowSize {
-  width: number;
-  height: number;
-}
+import React, { useState } from "react";
 
 export default function Home() {
 
-  const [windowSize, setWindowSize] = useState<WindowSize>();
   const [modalSrc, setModalSrc] = useState<string | undefined>();
 
-  const updateWindowSize = () => {
-    setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-  }
-
-  useEffect(() => {
-    updateWindowSize();
-    window.addEventListener("resize", updateWindowSize);
-    return () => window.removeEventListener("resize", updateWindowSize);
-  }, []);
-
-  const portrait = windowSize ? windowSize.width <= 768 : true;
-  const rowHeight = windowSize ? (portrait ? 16 : (16 + 16 * (windowSize.width - 768) / 1152)) : 16;
-
-  return (!windowSize) ? (<div />) : (
-    <WindowContext.Provider value={{ portrait, rowHeight }}>
+  return (
+    <>
       <Modal src={modalSrc} onClose={() => setModalSrc(undefined)} />
 
       <GridSection rows={34} id="home">
@@ -91,6 +71,7 @@ export default function Home() {
           <a href="mailto:IVManor@outlook.com">IVManor@outlook.com</a>
         </GridText>
       </GridSection>
-    </WindowContext.Provider>
+    </>
+
   );
 }

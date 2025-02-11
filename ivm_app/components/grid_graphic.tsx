@@ -21,6 +21,7 @@ const GridGraphic: React.FC<GridGraphicProps> = ({ gridCell: gridArea, src, alt,
         className="h-full max-w-full object-scale-down"
         fill
         style={{ display: "block", margin: "auto" }}
+        sizes="75vw"
         {...onClick}
       />
     </GridCell>
