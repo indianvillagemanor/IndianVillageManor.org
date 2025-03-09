@@ -35,18 +35,6 @@ const menuContentStyle = {
   borderBottom: "1px solid #f0f0f0",
 };
 
-const listItemStyle = {
-  // listStyleType: "none",
-  padding: "6px",
-  cursor: "pointer",
-}
-
-
-const LI = ({ children }: { children: ReactNode }) => {
-  return <li style={listItemStyle}>{children}</li>;
-}
-
-
 const headerStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
@@ -96,21 +84,21 @@ const SiteMenu = () => {
         <div style={overlayStyle} onClick={toggleMenu}>
           <div style={menuContentStyle} onClick={(e) => e.stopPropagation()}>
             <ul>
-              <LI><a href="/#home" onClick={closeMenu}>Home</a></LI>
-              <LI><a href="/#floorplans" onClick={closeMenu}>Floor Plans</a></LI>
-              <LI><a href="/#contact" onClick={closeMenu}>Contact</a></LI>
-              <LI><hr /></LI>
+              <li><a href="/#home" onClick={closeMenu}>Home</a></li>
+              <li><a href="/#floorplans" onClick={closeMenu}>Floor Plans</a></li>
+              <li><a href="/#contact" onClick={closeMenu}>Contact</a></li>
+              <li><hr /></li>
               {
                 loggedIn
                   ?
                   <>
-                    <LI><a href="/calendar" onClick={closeMenu}>Calendar</a></LI>
-                    <LI><a href="/newsletter" onClick={closeMenu}>Newsletter</a></LI>
-                    <LI><a href="/tickets" onClick={closeMenu}>Tickets</a></LI>
-                    <LI><hr /></LI>
-                    <LI><a href="/auth/logout" onClick={closeMenu}>Logout</a></LI>
+                    <li><a href="/calendar" onClick={closeMenu}>Calendar</a></li>
+                    <li><a href="/newsletter" onClick={closeMenu}>Newsletter</a></li>
+                    <li><a href="/tickets" onClick={closeMenu}>Tickets</a></li>
+                    <li><hr /></li>
+                    <li><a href="/auth/logout" onClick={closeMenu}>Logout</a></li>
                   </>
-                  : <LI><a href="/auth/login" onClick={closeMenu}>Login</a></LI>
+                  : <li><a href="/auth/login" onClick={closeMenu}>Login</a></li>
               }
             </ul>
           </div>

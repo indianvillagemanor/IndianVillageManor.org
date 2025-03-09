@@ -17,6 +17,8 @@ import {
 
 import { LoginSchema } from "@/schemas";
 import { Input } from "@/components/ui/input";
+import { FormError } from "@/components/form_error";
+import { FormSuccess } from "@/components/form_success";
 
 
 const LoginPage = () => {
@@ -29,11 +31,15 @@ const LoginPage = () => {
     }
   });
 
+  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+    console.log(values);
+  }
+
   return (
     <AuthCard cardLabel={'Co-owner and Resident portal to IVM'} exitLabel={"Register as a new user"} exitHref={'/auth/register'}>
       <Form {...form}>
         <form
-          onSubmit={() => { }}
+          onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6">
           <div className="space-y-4">
             <FormField
@@ -71,8 +77,8 @@ const LoginPage = () => {
               )}
             />
           </div>
-          {/* <FormError message={error} />
-          <FormSuccess message={success} /> */}
+          <FormError message="" />
+          <FormSuccess message="" />
           <Button type="submit" className="w-full" disabled={false}>
             Login
           </Button>
