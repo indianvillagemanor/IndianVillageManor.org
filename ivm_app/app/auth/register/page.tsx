@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react'
+import React, { useState, useTransition } from 'react'
 
 import * as z from "zod";
 
@@ -12,10 +12,13 @@ import AuthCard from '@/components/auth/auth_card';
 import { RegisterSchema } from '@/schemas';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { register } from '@/actions/register';
 
 
 const RegisterPage = () => {
-  const isPending = false;
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>();
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
@@ -23,8 +26,22 @@ const RegisterPage = () => {
       email: "",
       password: "",
       name: "",
+      unit: "",
+      phone: ""
     }
   });
+
+  const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
+    setError(undefined);
+    setSuccess(undefined);
+
+    startTransition(() => {
+      register(values).then((data) => {
+        setError(data.error);
+        setSuccess(data.success);
+      });
+    });
+  }
 
   return (
     <AuthCard

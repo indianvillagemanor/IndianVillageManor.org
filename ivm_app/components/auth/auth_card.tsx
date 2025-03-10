@@ -28,6 +28,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ children, cardLabel, exitLabel, exi
             <Image src="/IVM Logo Design_Black_24 0225_t.png"
               alt="IVM Logo"
               width="128" height="128"
+              priority
             />
           </h1>
           <p className="text-muted-foreground text-sm">

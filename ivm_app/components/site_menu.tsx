@@ -39,7 +39,6 @@ const headerStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  width: '100%',
   padding: '0px',
   paddingBottom: '1px',
   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -50,7 +49,7 @@ const headerStyle: React.CSSProperties = {
 };
 
 const headerImg = {
-  width: "100%",
+  width: "100vw",
   height: "36px",
 }
 
@@ -75,7 +74,6 @@ const SiteMenu = () => {
         alt="ivm"
         style={headerImg}
         priority
-        sizes="100vw"
       />
       <div style={menuStyle} onClick={toggleMenu} >
         &#9776; Menu
