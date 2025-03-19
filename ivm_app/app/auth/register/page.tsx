@@ -13,6 +13,8 @@ import { RegisterSchema } from '@/schemas';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { register } from '@/actions/register';
+import { FormError } from '@/components/form_error';
+import { FormSuccess } from '@/components/form_success';
 
 
 const RegisterPage = () => {
@@ -37,6 +39,7 @@ const RegisterPage = () => {
 
     startTransition(() => {
       register(values).then((data) => {
+        console.log("registration returned data ", data);
         setError(data.error);
         setSuccess(data.success);
       });
@@ -51,7 +54,7 @@ const RegisterPage = () => {
     >
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(() => { })}
+          onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6">
           <div className="space-y-4">
             <FormField
@@ -137,8 +140,8 @@ const RegisterPage = () => {
               )}
             />
           </div>
-          {/* <FormError message={error} />
-          <FormSuccess message={success} /> */}
+          <FormError message={error} />
+          <FormSuccess message={success} />
           <Button type="submit" className="w-full" disabled={isPending}>
             Register
           </Button>
