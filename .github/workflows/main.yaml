@@ -30,6 +30,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ivm_app_build
+          include-hidden-files: true
           path: |
             ivm_app/.next
             ivm_app/public
@@ -70,7 +71,7 @@ jobs:
           REPO="${GITHUB_REPOSITORY,,}"
           export GITHUB_REF_IMAGE=ghcr.io/$REPO:$GITHUB_SHA
           export GITHUB_BRANCH_IMAGE=ghcr.io/$REPO:$TAG
-          docker build -t $GITHUB_REF_IMAGE -t $GITHUB_BRANCH_IMAGE ivm_app
+          docker build -t $GITHUB_REF_IMAGE -t $GITHUB_BRANCH_IMAGE .
           echo "Pushing Image to GitHub Container Registry"
           docker push $GITHUB_REF_IMAGE
           docker push $GITHUB_BRANCH_IMAGE
