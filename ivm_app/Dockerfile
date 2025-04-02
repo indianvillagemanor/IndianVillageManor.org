@@ -5,12 +5,13 @@ ENV NPM_CONFIG_LOGLEVEL warn
 
 RUN mkdir /app && chown -R node:node /app
 
-RUN ls -alR /app
 
 WORKDIR /app
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+COPY --chown=node:node package.json package.json
+COPY --chown=node:node package-lock.json package-lock.json
+
+RUN ls -alR
 
 USER node
 
