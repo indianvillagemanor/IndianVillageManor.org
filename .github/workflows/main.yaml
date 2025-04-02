@@ -7,9 +7,6 @@ on:
       - "!dependabot/*"
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: ./ivm_app
 
 jobs:
   next-build:
@@ -18,14 +15,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - run: npm ci
-      - run: npm run build
+      - name: npm 
+        working-directory: ./ivm_app
+        run: |
+          npm ci
+          npm run build
       - name: List files
         run: |
           echo "Listing files in ivm_app/.next:"
-          ls -alR .next
+          ls -alR ivm_app/.next
           echo "Listing files in ivm_app/public:"
-          ls -alR public
+          ls -alR ivm_app/public
       - name: Upload Next build
         uses: actions/upload-artifact@v4
         with:
@@ -43,8 +43,6 @@ jobs:
           set -x
           pwd
           ls -a
-          echo "Listing files in ivm_app:"
-          ls -a ivm_app
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download Next build
@@ -56,8 +54,6 @@ jobs:
           set -x
           pwd
           ls -a
-          echo "Listing files in ivm_app:"
-          ls -a ivm_app
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
