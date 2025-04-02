@@ -50,11 +50,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
         run: |
-          ls -al
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == "main" ]] && echo "latest" || echo $CURRENT_BRANCH)
           export GITHUB_REF_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$GITHUB_SHA
           export GITHUB_BRANCH_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$TAG
+          echo "Building Docker Image with tags $GCR_IMAGE, $GITHUB_REF_IMAGE, $GITHUB_BRANCH_IMAGE"
+          set -x
           docker build -t $GCR_IMAGE -t $GITHUB_REF_IMAGE -t $GITHUB_BRANCH_IMAGE
           echo "Pushing Image to GitHub Container Registry"
           docker push $GITHUB_REF_IMAGE
