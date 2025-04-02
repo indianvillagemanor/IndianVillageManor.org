@@ -5,7 +5,7 @@ on:
     branches:
       - "*"
       - "!dependabot/*"
-  workflows_dispatch:
+  workflow_dispatch:
 
 defaults:
   run:
