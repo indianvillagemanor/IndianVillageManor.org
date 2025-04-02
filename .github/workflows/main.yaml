@@ -14,7 +14,7 @@ defaults:
 jobs:
   next-build:
     runs-on: ubuntu-latest
-    container: node:alpine:3.21.3
+    container: node:23-alpine3.20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
