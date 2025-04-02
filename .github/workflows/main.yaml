@@ -51,6 +51,8 @@ jobs:
       - name: Build and push Docker image
         run: |
           set -x
+          pwd
+          ls -a
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == "main" ]] && echo "latest" || echo $CURRENT_BRANCH)
           REPO="${GITHUB_REPOSITORY,,}"
