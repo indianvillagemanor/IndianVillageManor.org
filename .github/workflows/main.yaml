@@ -7,9 +7,6 @@ on:
       - "!dependabot/*"
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: ./ivm_app
 
 jobs:
   next-build:
@@ -19,7 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - run: npm ci
+        working-directory: ./ivm_app
       - run: npm run build
+        working-directory: ./ivm_app
       - name: List files
         run: |
           echo "Listing files in the current directory:"
@@ -28,6 +27,8 @@ jobs:
           ls -al .next
           echo "Listing files in the public directory:"
           ls -al public
+          echo "Listing files in the ivm_app directory:"
+          ls -al ivm_app
       - name: Upload Next build
         uses: actions/upload-artifact@v4
         with:
