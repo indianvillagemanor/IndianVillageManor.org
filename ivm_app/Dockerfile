@@ -5,6 +5,8 @@ ENV NPM_CONFIG_LOGLEVEL warn
 
 RUN mkdir /app && chown -R node:node /app
 
+RUN ls -alR /app
+
 WORKDIR /app
 
 COPY package.json package.json
@@ -12,7 +14,7 @@ COPY package-lock.json package-lock.json
 
 USER node
 
-RUN npm install --production
+RUN npm install --omit=dev
 COPY --chown=node:node .next .next
 COPY --chown=node:node public public
 
