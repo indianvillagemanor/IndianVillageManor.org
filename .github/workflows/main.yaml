@@ -20,6 +20,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm ci
       - run: npm run build
+      - name: List files
+        run: |
+          echo "Listing files in the current directory:"
+          ls -al
+          echo "Listing files in the .next directory:"
+          ls -al .next
+          echo "Listing files in the public directory:"
+          ls -al public
       - name: Upload Next build
         uses: actions/upload-artifact@v4
         with:
