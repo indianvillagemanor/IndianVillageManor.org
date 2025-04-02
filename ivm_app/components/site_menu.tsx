@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, ReactNode } from "react";
+import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import ivmGreen from "@/public/ivm_green.png"
 
 const menuStyle = {
@@ -82,21 +83,21 @@ const SiteMenu = () => {
         <div style={overlayStyle} onClick={toggleMenu}>
           <div style={menuContentStyle} onClick={(e) => e.stopPropagation()}>
             <ul>
-              <li><a href="/#home" onClick={closeMenu}>Home</a></li>
-              <li><a href="/#floorplans" onClick={closeMenu}>Floor Plans</a></li>
-              <li><a href="/#contact" onClick={closeMenu}>Contact</a></li>
+              <li><Link href="/#home" onClick={closeMenu}>Home</Link></li>
+              <li><Link href="/#floorplans" onClick={closeMenu}>Floor Plans</Link></li>
+              <li><Link href="/#contact" onClick={closeMenu}>Contact</Link></li>
               <li><hr /></li>
               {
                 loggedIn
                   ?
                   <>
-                    <li><a href="/calendar" onClick={closeMenu}>Calendar</a></li>
-                    <li><a href="/newsletter" onClick={closeMenu}>Newsletter</a></li>
-                    <li><a href="/tickets" onClick={closeMenu}>Tickets</a></li>
+                    <li><Link href="/calendar" onClick={closeMenu}>Calendar</Link></li>
+                    <li><Link href="/newsletter" onClick={closeMenu}>Newsletter</Link></li>
+                    <li><Link href="/tickets" onClick={closeMenu}>Tickets</Link></li>
                     <li><hr /></li>
-                    <li><a href="/auth/logout" onClick={closeMenu}>Logout</a></li>
+                    <li><Link href="/auth/logout" onClick={closeMenu}>Logout</Link></li>
                   </>
-                  : <li><a href="/auth/login" onClick={closeMenu}>Login</a></li>
+                  : <li><Link href="/auth/login" onClick={closeMenu}>Login</Link></li>
               }
             </ul>
           </div>
