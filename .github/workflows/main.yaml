@@ -7,6 +7,9 @@ on:
       - "!dependabot/*"
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: ./ivm_app
 
 jobs:
   next-build:
@@ -16,22 +19,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - run: npm ci
-        working-directory: ./ivm_app
       - run: npm run build
-        working-directory: ./ivm_app
       - name: List files
         run: |
           echo "Listing files in the current directory:"
           ls -alR
       - name: Upload Next build
         uses: actions/upload-artifact@v4
+        working-directory: ./ivm_app
         with:
           name: build
           path: |
             .next
             public
-            ivm_app
-          retention-days: 30
+          retention-days: 7
   docker-push:
     needs: next-build
     runs-on: ubuntu-latest
@@ -43,11 +44,11 @@ jobs:
         with:
           name: build
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
         run: |
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
