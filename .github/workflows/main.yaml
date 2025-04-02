@@ -22,13 +22,7 @@ jobs:
       - name: List files
         run: |
           echo "Listing files in the current directory:"
-          ls -al
-          echo "Listing files in the .next directory:"
-          ls -al .next
-          echo "Listing files in the public directory:"
-          ls -al public
-          echo "Listing files in the ivm_app directory:"
-          ls -al ivm_app
+          ls -alR
       - name: Upload Next build
         uses: actions/upload-artifact@v4
         with:
@@ -36,6 +30,7 @@ jobs:
           path: |
             .next
             public
+            ivm_app
           retention-days: 30
   docker-push:
     needs: next-build
