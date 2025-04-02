@@ -27,7 +27,7 @@ jobs:
       - name: Upload Next build
         uses: actions/upload-artifact@v4
         with:
-          name: ivm_app
+          name: ivm_app_build
           path: |
             ivm_app/.next
             ivm_app/public
@@ -41,7 +41,7 @@ jobs:
       - name: Download Next build
         uses: actions/download-artifact@v4
         with:
-          name: build
+          name: ivm_app_build
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -50,6 +50,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
         run: |
+          ls -al
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == "main" ]] && echo "latest" || echo $CURRENT_BRANCH)
           export GITHUB_REF_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$GITHUB_SHA
