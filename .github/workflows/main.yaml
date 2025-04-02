@@ -1,0 +1,58 @@
+name: Build & Publish
+
+on:
+  push:
+    branches:
+      - "*"
+      - "!dependabot/*"
+  workflows_dispatch:
+
+defaults:
+  run:
+    working-directory: ./ivm_app
+
+jobs:
+  next-build:
+  runs-on: ubuntu-latest
+  container: node:alpine:3.21.3
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - run: npm ci
+    - run: npm run build
+    - name: Upload Next build
+      uses: actions/upload-artifact@v3
+      with:
+        name: build
+        path: |
+          .next
+          public
+        retention-days: 30
+  docker-push:
+    needs: next-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Download Next build
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+      - name: Build and push Docker image
+        run: |
+          export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+          export TAG=$([[ $CURRENT_BRANCH == "main" ]] && echo "latest" || echo $CURRENT_BRANCH)
+          export GITHUB_REF_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$GITHUB_SHA
+          export GITHUB_BRANCH_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$TAG
+          docker build -t $GCR_IMAGE -t $GITHUB_REF_IMAGE -t $GITHUB_BRANCH_IMAGE
+          echo "Pushing Image to GitHub Container Registry"
+          docker push $GITHUB_REF_IMAGE
+          docker push $GITHUB_BRANCH_IMAGE
+
+  
