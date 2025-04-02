@@ -13,21 +13,21 @@ defaults:
 
 jobs:
   next-build:
-  runs-on: ubuntu-latest
-  container: node:alpine:3.21.3
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - run: npm ci
-    - run: npm run build
-    - name: Upload Next build
-      uses: actions/upload-artifact@v3
-      with:
-        name: build
-        path: |
-          .next
-          public
-        retention-days: 30
+    runs-on: ubuntu-latest
+    container: node:alpine:3.21.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: npm ci
+      - run: npm run build
+      - name: Upload Next build
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: |
+            .next
+            public
+          retention-days: 30
   docker-push:
     needs: next-build
     runs-on: ubuntu-latest
