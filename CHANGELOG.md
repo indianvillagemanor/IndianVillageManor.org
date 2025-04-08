@@ -1,3 +1,9 @@
+### Matching Squarespace, many other changes
+- entire site matching squarespace
+- added initial auth menus and pages
+- containerized
+- implemented ci in github workflow actions
+
 ### first section grid layout for landscape
 - matching current squarespace first section appropriately for wide displays
 
