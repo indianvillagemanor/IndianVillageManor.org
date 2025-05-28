@@ -22,7 +22,6 @@ import { FormError } from "@/components/form_error";
 import { FormSuccess } from "@/components/form_success";
 import { login } from "@/actions/login";
 
-
 const LoginPage = () => {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>();
@@ -33,7 +32,6 @@ const LoginPage = () => {
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
-      password: ""
     }
   });
 
@@ -66,23 +64,6 @@ const LoginPage = () => {
                       disabled={isPending}
                       placeholder="john.doe@example.com"
                       type="email"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input {...field}
-                      placeholder="******"
-                      type="password"
-                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />

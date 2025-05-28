@@ -8,9 +8,17 @@ datasource db {
 }
 
 model User {
-  email    String @unique
-  password String
-  name     String
-  unit     String
-  phone    String
+  email          String           @unique
+  name           String
+  unit           String
+  phone          String
+  MagicLinkToken MagicLinkToken[]
+}
+
+model MagicLinkToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [email])
 }

@@ -26,7 +26,6 @@ const RegisterPage = () => {
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
       email: "",
-      password: "",
       name: "",
       unit: "",
       phone: ""
@@ -98,23 +97,6 @@ const RegisterPage = () => {
                     <Input {...field}
                       placeholder="john.doe@example.com"
                       type="email"
-                      disabled={isPending}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input {...field}
-                      placeholder="******"
-                      type="password"
                       disabled={isPending}
                     />
                   </FormControl>

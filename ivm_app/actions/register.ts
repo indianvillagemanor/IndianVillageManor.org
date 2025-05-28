@@ -27,7 +27,6 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   await prisma.user.create({
     data: {
       email: values.email,
-      password: "INSECURE",
       name: values.name,
       unit: values.unit,
       phone: values.phone,
