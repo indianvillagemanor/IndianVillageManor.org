@@ -7,7 +7,7 @@ import type { Session, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import type { LoggerInstance } from "next-auth";
 
-export const authOptions = {
+const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
@@ -41,7 +41,7 @@ export const authOptions = {
     // You can customize other pages as needed
   },
   callbacks: {
-    async session({ session, token, user }: { session: Session; token: JWT; user?: User }) {
+    async session({ session, /*token, user*/ }: { session: Session; token: JWT; user?: User }) {
       // ...existing code for session customization (if needed)...
       return session;
     },
