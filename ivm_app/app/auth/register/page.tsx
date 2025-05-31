@@ -32,6 +32,10 @@ const RegisterPage = () => {
     }
   });
 
+  if (form.formState.errors && Object.keys(form.formState.errors).length > 0) {
+    console.error("formState.errors", form.formState.errors);
+  }
+
   const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
     setError(undefined);
     setSuccess(undefined);
