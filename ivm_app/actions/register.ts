@@ -1,6 +1,7 @@
 "use server";
 
 import * as z from "zod";
+import crypto from "crypto";
 import nodemailer from "nodemailer";
 
 import { RegisterSchema } from "@/schemas";
@@ -34,24 +35,35 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     },
   });
 
-  // Send congratulatory email
+  // Generate a verification token
+  const token = crypto.randomBytes(32).toString("hex");
+  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours from now
+  await prisma.verificationToken.create({
+    data: {
+      identifier: values.email,
+      token,
+      expires,
+    },
+  });
+
+  // Send verification email
   try {
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const verifyUrl = `${baseUrl}/auth/verify?token=${token}&email=${encodeURIComponent(values.email)}`;
     const transport = nodemailer.createTransport(process.env.EMAIL_SERVER!);
-    const mailOptions = {
+    await transport.sendMail({
       to: values.email,
       from: process.env.EMAIL_FROM,
-      subject: "Welcome to Indian Village Manor!",
-      text: `Congratulations, ${values.name || "Resident"}!\n\nYour registration at Indian Village Manor is complete. We are excited to have you as part of our community.\n\nIf you have any questions, feel free to reply to this email.`,
-      html: `<p>Congratulations, <strong>${values.name || "Resident"}</strong>!</p><p>Your registration at <strong>Indian Village Manor</strong> is complete. We are excited to have you as part of our community.</p><p>If you have any questions, feel free to reply to this email.</p>`,
-    }
-    console.log("Sending congratulatory email with:", mailOptions);
-    await transport.sendMail(mailOptions);
+      subject: "Verify your email for Indian Village Manor",
+      text: `Welcome to Indian Village Manor! Please verify your email by clicking the link below (valid for 24 hours):\n\n${verifyUrl}`,
+      html: `<p>Welcome to Indian Village Manor!</p><p>Please verify your email by clicking the link below (valid for 24 hours):</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`
+    });
   } catch (e) {
-    console.error("Failed to send congratulatory email:", e);
+    console.error("Failed to send verification email:", e);
   }
 
   revalidatePath("/");
 
-  return { success: "Fields validated!" };
+  return { success: "Registration successful! Please check your email to verify your account." };
 
 }
