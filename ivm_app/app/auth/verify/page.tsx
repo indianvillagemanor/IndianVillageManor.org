@@ -1,15 +1,18 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 
 export default function VerifyPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");
   const [message, setMessage] = useState<string>("");
+  const hasVerified = useRef(false);
 
   useEffect(() => {
+    if (hasVerified.current) return;
+    hasVerified.current = true;
+
     const token = searchParams.get("token");
     const email = searchParams.get("email");
     if (!token || !email) {
@@ -17,8 +20,11 @@ export default function VerifyPage() {
       setMessage("Invalid verification link.");
       return;
     }
-    // Call API route to verify
-    fetch(`/api/auth/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`)
+    fetch("/api/auth/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, email }),
+    })
       .then(async (res) => {
         const data = await res.json();
         if (res.ok && data.success) {
