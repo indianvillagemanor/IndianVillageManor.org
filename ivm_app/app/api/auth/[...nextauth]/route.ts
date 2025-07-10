@@ -39,9 +39,14 @@ const authOptions = {
   pages: {
     signIn: "/auth/login",
     verifyRequest: "/auth/verify-request",
-    // You can customize other pages as needed
+    // Redirect to homepage after login
+    newUser: "/", // after first registration
   },
   callbacks: {
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+      // Always redirect to homepage after login
+      return baseUrl;
+    },
     async session({ session, /*token, user*/ }: { session: Session; token: JWT; user?: User }) {
       // ...existing code for session customization (if needed)...
       return session;
