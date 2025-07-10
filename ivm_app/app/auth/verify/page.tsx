@@ -30,6 +30,18 @@ export default function VerifyPage() {
         if (res.ok && data.success) {
           setStatus("success");
           setMessage(data.success);
+          // Broadcast login event to other tabs
+          if (typeof window !== "undefined") {
+            const url = window.location.href;
+            if (window.BroadcastChannel) {
+              const bc = new BroadcastChannel("ivm-auth");
+              bc.postMessage({ type: "auth-login", url });
+              bc.close();
+            } else {
+              localStorage.setItem("ivm_auth_login", JSON.stringify({ url, ts: Date.now() }));
+            }
+            window.close();
+          }
         } else {
           setStatus("error");
           setMessage(data.error || "Verification failed.");
