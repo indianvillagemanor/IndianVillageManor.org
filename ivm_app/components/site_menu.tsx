@@ -95,7 +95,21 @@ const SiteMenu = () => {
                   <>
                     <li><Link href="/calendar" onClick={closeMenu}>Calendar</Link></li>
                     <li><Link href="/newsletter" onClick={closeMenu}>Newsletter</Link></li>
-                    <li><Link href="/tickets" onClick={closeMenu}>Tickets</Link></li>
+                    <li>
+                      <span
+                        style={{
+                          color: '#bbb',
+                          cursor: 'not-allowed',
+                          pointerEvents: 'none',
+                          opacity: 0.7,
+                          userSelect: 'none',
+                        }}
+                        aria-disabled="true"
+                        tabIndex={-1}
+                      >
+                        Tickets
+                      </span>
+                    </li>
                     <li><hr /></li>
                     <li>
                       <button
