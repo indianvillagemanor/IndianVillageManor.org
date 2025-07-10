@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import ivmGreen from "@/public/ivm_green.png"
@@ -66,7 +67,8 @@ const SiteMenu = () => {
     setIsOpen(false);
   }
 
-  const loggedIn = false;
+  const { status } = useSession();
+  const loggedIn = status === "authenticated";
 
   return (
     <header style={headerStyle}>
@@ -95,7 +97,17 @@ const SiteMenu = () => {
                     <li><Link href="/newsletter" onClick={closeMenu}>Newsletter</Link></li>
                     <li><Link href="/tickets" onClick={closeMenu}>Tickets</Link></li>
                     <li><hr /></li>
-                    <li><Link href="/auth/logout" onClick={closeMenu}>Logout</Link></li>
+                    <li>
+                      <button
+                        style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", padding: 0, font: "inherit" }}
+                        onClick={() => {
+                          closeMenu();
+                          signOut({ callbackUrl: "/" });
+                        }}
+                      >
+                        Logout
+                      </button>
+                    </li>
                   </>
                   : <li><Link href="/auth/login" onClick={closeMenu}>Login</Link></li>
               }
