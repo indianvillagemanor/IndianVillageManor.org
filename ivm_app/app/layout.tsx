@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Serif } from "next/font/google";
 import "./globals.css";
-import SiteMenu from "@/components/site_menu";
+import SiteMenuClient from "@/components/SiteMenuClient";
 import WindowWithSize from "@/components/window_with_size";
 
 const Noto = Noto_Serif({
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${Noto.variable} antialiased`}>
-        <SiteMenu />
+        <SiteMenuClient />
         <main style={contentStyle}>
           <WindowWithSize>
             {children}

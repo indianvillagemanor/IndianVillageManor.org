@@ -2,8 +2,18 @@
 
 import { useEffect, useState } from "react";
 
+type User = {
+  id: string | number;
+  name?: string | null;
+  email: string;
+  emailVerified?: boolean | null;
+  createdAt?: string | Date | null;
+  updatedAt?: string | Date | null;
+  role?: string | null;
+};
+
 export default function DemoUsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
