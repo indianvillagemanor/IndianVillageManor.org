@@ -20,8 +20,11 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
 
   try {
     await handleLogin(email);
-  } catch (err: any) {
-    return { error: err.message || "Failed to send magic link." };
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return { error: err.message || "Failed to send magic link." };
+    }
+    return { error: "Failed to send magic link." };
   }
 
   return { success: "requested sending of magic link!" };
