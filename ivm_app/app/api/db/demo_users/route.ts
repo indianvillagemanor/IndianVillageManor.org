@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
       emailVerified: true,
       createdAt: true,
       updatedAt: true,
+      role: true,
     },
     orderBy: { createdAt: "desc" },
   });

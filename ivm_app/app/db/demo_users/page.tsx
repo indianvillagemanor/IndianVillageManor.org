@@ -36,6 +36,7 @@ export default function DemoUsersPage() {
               <th className="border p-2">Verified</th>
               <th className="border p-2">Created At</th>
               <th className="border p-2">Updated At</th>
+              <th className="border p-2">Role</th>
             </tr>
           </thead>
           <tbody>
@@ -47,6 +48,7 @@ export default function DemoUsersPage() {
                 <td className="border p-2">{user.emailVerified ? "Yes" : "No"}</td>
                 <td className="border p-2">{user.createdAt ? new Date(user.createdAt).toLocaleString() : ""}</td>
                 <td className="border p-2">{user.updatedAt ? new Date(user.updatedAt).toLocaleString() : ""}</td>
+                <td className="border p-2">{user.role}</td>
               </tr>
             ))}
           </tbody>

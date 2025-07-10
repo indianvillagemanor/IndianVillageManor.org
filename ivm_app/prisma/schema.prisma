@@ -15,6 +15,7 @@ model User {
   image         String?
   unit          String?
   phone         String?
+  role          Role            @default(USER)
   accounts      Account[]
   sessions      Session[]
   // Optional for WebAuthn support
@@ -22,6 +23,12 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  PUBLISHER
+  ADMIN
 }
 
 model Account {
