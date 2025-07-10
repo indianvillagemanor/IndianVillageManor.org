@@ -38,6 +38,7 @@ const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/auth/login",
+    verifyRequest: "/auth/verify-request",
     // You can customize other pages as needed
   },
   callbacks: {

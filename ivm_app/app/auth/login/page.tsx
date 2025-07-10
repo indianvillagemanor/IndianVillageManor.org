@@ -4,6 +4,7 @@ import * as z from "zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
+import { signIn } from "next-auth/react";
 
 import AuthCard from '@/components/auth/auth_card'
 import { Button } from '@/components/ui/button'
@@ -40,8 +41,14 @@ const LoginPage = () => {
     setSuccess(undefined);
     startTransition(() => {
       login(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        if (data.error) {
+          setError(data.error);
+        } else if (data.success && data.email) {
+          // Set email in sessionStorage before redirect
+          sessionStorage.setItem("ivm_last_login_email", data.email);
+          signIn("email", { email: data.email });
+          setSuccess("Requested sending of magic link!");
+        }
       })
     });
   }

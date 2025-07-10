@@ -4,29 +4,13 @@ import * as z from "zod";
 
 import { LoginSchema } from "@/schemas";
 
-import { signIn } from "next-auth/react";
-
-const handleLogin = async (email: string) => {
-  await signIn("email", { email });
-};
-
 export const login = async (values: z.infer<typeof LoginSchema>) => {
+  console.log("Login action called with values:", values);
   const validatedFields = LoginSchema.safeParse(values);
   if (!validatedFields.success) {
     return { error: "Invalid fields!" };
   }
 
-  const { email } = validatedFields.data;
-
-  try {
-    await handleLogin(email);
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      return { error: err.message || "Failed to send magic link." };
-    }
-    return { error: "Failed to send magic link." };
-  }
-
-  return { success: "requested sending of magic link!" };
-
+  // Only validate fields and return success; do not call signIn here
+  return { success: "Fields validated!", email: validatedFields.data.email };
 }
