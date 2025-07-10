@@ -3,6 +3,7 @@ import { Noto_Serif } from "next/font/google";
 import "./globals.css";
 import SiteMenuClient from "@/components/SiteMenuClient";
 import WindowWithSize from "@/components/window_with_size";
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 const Noto = Noto_Serif({
   variable: "--font-serif",
@@ -27,12 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${Noto.variable} antialiased`}>
-        <SiteMenuClient />
-        <main style={contentStyle}>
-          <WindowWithSize>
-            {children}
-          </WindowWithSize>
-        </main>
+        <SessionProviderWrapper>
+          <SiteMenuClient />
+          <main style={contentStyle}>
+            <WindowWithSize>
+              {children}
+            </WindowWithSize>
+          </main>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
