@@ -43,7 +43,7 @@ const authOptions = {
     newUser: "/", // after first registration
   },
   callbacks: {
-    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+    async redirect({ baseUrl }: { url: string; baseUrl: string }) {
       // Always redirect to homepage after login
       return baseUrl;
     },

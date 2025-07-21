@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 export default function SessionProviderWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    function handleAuthLogin(event: any) {
+    function handleAuthLogin(event: {data : {type: string}}) {
       if (event?.data?.type === "auth-login") {
         // Reload or redirect to homepage after login event
         window.location.href = "/";
