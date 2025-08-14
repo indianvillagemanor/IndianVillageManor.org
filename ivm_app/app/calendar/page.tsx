@@ -4,7 +4,7 @@ function getMonthMatrix(year: number, month: number) {
   const lastDay = new Date(year, month + 1, 0);
   const matrix = [];
   let week = [];
-  let dayOfWeek = firstDay.getDay();
+  const dayOfWeek = firstDay.getDay();
   // Fill initial empty days
   for (let i = 0; i < dayOfWeek; i++) week.push(null);
   for (let d = 1; d <= lastDay.getDate(); d++) {
