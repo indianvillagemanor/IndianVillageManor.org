@@ -32,14 +32,18 @@ const RegisterPage = () => {
     }
   });
 
+
   const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
     setError(undefined);
     setSuccess(undefined);
 
     startTransition(() => {
       register(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        if (data && data.success) {
+          window.location.href = "/auth/register/pending";
+        } else {
+          setError(data.error);
+        }
       });
     });
   }
