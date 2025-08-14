@@ -12,13 +12,13 @@ import AuthCard from '@/components/auth/auth_card';
 import { RegisterSchema } from '@/schemas';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { register } from '@/actions/register';
+import { register } from './action';
 import { FormError } from '@/components/form_error';
 import { FormSuccess } from '@/components/form_success';
 
 
 const RegisterPage = () => {
-  const [isPending, startTransition] = useTransition();
+  const [isPending] = useTransition();
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
 
@@ -33,19 +33,21 @@ const RegisterPage = () => {
   });
 
 
-  const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
+  const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     setError(undefined);
     setSuccess(undefined);
 
-    startTransition(() => {
-      register(values).then((data) => {
-        if (data && data.success) {
-          window.location.href = "/auth/register/pending";
-        } else {
-          setError(data.error);
-        }
-      });
-    });
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("unit", values.unit);
+    formData.append("email", values.email);
+    formData.append("phone", values.phone);
+    const result = await register(formData);
+    if (result && result.success) {
+      window.location.href = "/auth/register/pending";
+    } else {
+      setError(result.error);
+    }
   }
 
   return (

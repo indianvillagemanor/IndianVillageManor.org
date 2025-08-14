@@ -1,32 +1,29 @@
 "use server";
 
-import * as z from "zod";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-
-import { revalidatePath } from "next/cache";
 import { RegisterSchema } from "@/schemas";
 import { prisma } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
-export const register = async (values: z.infer<typeof RegisterSchema>) => {
+export async function register(formData: FormData) {
+  const values = {
+    name: formData.get("name")?.toString() || "",
+    unit: formData.get("unit")?.toString() || "",
+    email: formData.get("email")?.toString() || "",
+    phone: formData.get("phone")?.toString() || "",
+  };
   const validatedFields = RegisterSchema.safeParse(values);
   if (!validatedFields.success) {
     return { error: "Invalid fields!" };
   }
-
   const existingUser = await prisma.user.findUnique({
-    where: {
-      email: values.email,
-    },
+    where: { email: values.email },
   });
-
   if (existingUser) {
     return { error: "User already exists" };
   }
-
-  console.log("actions Creating user with values", values);
-
-
+  console.log("app/auth/register Creating user with values", values);
   await prisma.user.create({
     data: {
       email: values.email,
@@ -35,27 +32,18 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
       phone: values.phone,
     },
   });
-
   // Notify all admins
   try {
-    console.log("Notifying admins...");
+    const admins = await prisma.user.findMany({ where: { role: "ADMIN" } });
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    // Generate a token for admin action (could be improved with a dedicated table)
     const adminToken = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
-    console.log("Creating verification token for admin approval");
+    const expires = new Date(Date.now() + 1000 * 60 * 60 * 24);
     await prisma.verificationToken.create({
-      data: {
-        identifier: values.email,
-        token: adminToken,
-        expires,
-      },
+      data: { identifier: values.email, token: adminToken, expires },
     });
-    console.log("Verification token created:", adminToken);
     const verifyUrl = `${baseUrl}/api/admin/verify-registration?token=${adminToken}&email=${encodeURIComponent(values.email)}`;
     const denyUrl = `${baseUrl}/api/admin/deny-registration?token=${adminToken}&email=${encodeURIComponent(values.email)}`;
     const transport = nodemailer.createTransport(process.env.EMAIL_SERVER!);
-    const admins = await prisma.user.findMany({ where: { role: "ADMIN" } });
     const recipients = [...admins.map(a => a.email), "verify@indianvillagemanor.org"];
     console.log("Sending admin registration email to:", recipients);
     await transport.sendMail({
@@ -68,9 +56,6 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   } catch (e) {
     console.error("Failed to notify admins:", e);
   }
-
   revalidatePath("/");
-
   return { success: "Registration successful! Please check your email to verify your account." };
-
 }
