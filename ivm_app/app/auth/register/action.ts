@@ -50,8 +50,8 @@ export async function register(formData: FormData) {
       to: recipients.join(","),
       from: process.env.EMAIL_FROM,
       subject: `New IVM Registration: ${values.name || values.email}`,
-      text: `A new user has registered.\n\nName: ${values.name}\nEmail: ${values.email}\nUnit: ${values.unit}\nPhone: ${values.phone}\n\nApprove: ${verifyUrl}\nDeny: ${denyUrl}`,
-      html: `<p>A new user has registered:</p><ul><li>Name: ${values.name}</li><li>Email: ${values.email}</li><li>Unit: ${values.unit}</li><li>Phone: ${values.phone}</li></ul><p><a href=\"${verifyUrl}\">Approve Registration</a> | <a href=\"${denyUrl}\">Deny Registration</a></p>`
+  text: `A new user has requested registration.\n\nName: ${values.name}\nEmail: ${values.email}\nUnit: ${values.unit}\nPhone: ${values.phone}\n\nApprove: ${verifyUrl}\nDeny: ${denyUrl}`,
+  html: `<p>A new user has requested registration:</p><ul><li>Name: ${values.name}</li><li>Email: ${values.email}</li><li>Unit: ${values.unit}</li><li>Phone: ${values.phone}</li></ul><p><a href=\"${verifyUrl}\">Approve Registration</a> | <a href=\"${denyUrl}\">Deny Registration</a></p>`
     });
   } catch (e) {
     console.error("Failed to notify admins:", e);
