@@ -21,8 +21,8 @@ export const authOptions = {
             to: identifier,
             from,
             subject: "Your sign-in link for IVM App",
-            text: `Sign in to IVM App by clicking the link below:\n\n${url}\n\nThis link will expire in 24 hours.`,
-            html: `<p>Sign in to IVM App by clicking the link below:</p><p><a href="${url}">Sign in</a></p><p>This link will expire in 24 hours.</p>`,
+            text: `Sign in to IVM App by clicking the link below:\n\n${url}\n\nThis link will expire in 7 days.`,
+            html: `<p>Sign in to IVM App by clicking the link below:</p><p><a href="${url}">Sign in</a></p><p>This link will expire in 7 days.</p>`,
           });
         } catch (error) {
           console.error("Error sending verification email:", error);
