@@ -64,9 +64,12 @@ export const authOptions = {
       // Allow sign in
       return true;
     },
-    async redirect({ baseUrl }: { url: string; baseUrl: string }) {
-      // Always redirect to homepage after login
-      return baseUrl;
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+      // Redirect to /welcome after login
+      if (url.startsWith(baseUrl)) {
+        return baseUrl + "/welcome";
+      }
+      return url;
     },
     async session({ session, /*token, user*/ }: { session: Session; token: JWT; user?: User }) {
       // ...existing code for session customization (if needed)...
