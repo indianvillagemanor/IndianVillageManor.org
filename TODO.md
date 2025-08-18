@@ -30,3 +30,4 @@
 
 - Make user's role a table, so that a user can have more than one role
 - If a user tries to log in or register before their account is verified, give a page notifying of the status
+- Create a test plan to check all features of the site

@@ -6,15 +6,16 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
   const email = searchParams.get("email");
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   if (!token || !email) {
-    return NextResponse.json({ error: "Invalid denial link." }, { status: 400 });
+    return NextResponse.redirect(`${baseUrl}/admin/deny-registration-result?error=Invalid%20denial%20link.`);
   }
   // Check token
   const verification = await prisma.verificationToken.findUnique({
     where: { identifier_token: { identifier: email, token } },
   });
   if (!verification || verification.expires < new Date()) {
-    return NextResponse.json({ error: "Denial link is invalid or has expired." }, { status: 400 });
+    return NextResponse.redirect(`${baseUrl}/admin/deny-registration-result?error=Denial%20link%20is%20invalid%20or%20has%20expired.`);
   }
   // Optionally, delete or disable the user here
   // Send denial email
@@ -24,8 +25,8 @@ export async function GET(req: NextRequest) {
       to: email,
       from: process.env.EMAIL_FROM,
       subject: "Registration could not be verified",
-      text: `We could not verify your status. Please contact the association if you believe this is in error.`,
-      html: `<p>We could not verify your status. Please contact the association if you believe this is in error.</p>`
+      text: `We could not verify your registration. If you believe this is in error, please contact the association for assistance.`,
+      html: `<p>We could not verify your registration. If you believe this is in error, please contact the association for assistance.</p>`
     });
   } catch (e) {
     console.error("Failed to send denial email:", e);
@@ -34,5 +35,5 @@ export async function GET(req: NextRequest) {
   await prisma.verificationToken.delete({
     where: { identifier_token: { identifier: email, token } },
   });
-  return NextResponse.json({ success: "User denied and notified." });
+  return NextResponse.redirect(`${baseUrl}/admin/deny-registration-result?success=User%20denied%20and%20notified.`);
 }
