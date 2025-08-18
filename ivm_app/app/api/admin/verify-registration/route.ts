@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import nodemailer from "nodemailer";
@@ -6,15 +7,16 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
   const email = searchParams.get("email");
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   if (!token || !email) {
-    return NextResponse.json({ error: "Invalid verification link." }, { status: 400 });
+    return NextResponse.redirect(`${baseUrl}/admin/verify-registration-result?error=Invalid%20verification%20link.`);
   }
   // Check token
   const verification = await prisma.verificationToken.findUnique({
     where: { identifier_token: { identifier: email, token } },
   });
   if (!verification || verification.expires < new Date()) {
-    return NextResponse.json({ error: "Verification link is invalid or has expired." }, { status: 400 });
+    return NextResponse.redirect(`${baseUrl}/admin/verify-registration-result?error=Verification%20link%20is%20invalid%20or%20has%20expired.`);
   }
   // Mark user as verified
   await prisma.user.update({
@@ -27,7 +29,6 @@ export async function GET(req: NextRequest) {
   });
   // Send congratulations + magic link email
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
     const magicLink = `${baseUrl}/auth/login?email=${encodeURIComponent(email)}`;
     const transport = nodemailer.createTransport(process.env.EMAIL_SERVER!);
     await transport.sendMail({
@@ -40,5 +41,5 @@ export async function GET(req: NextRequest) {
   } catch (e) {
     console.error("Failed to send approval email:", e);
   }
-  return NextResponse.json({ success: "User verified and notified." });
+  return NextResponse.redirect(`${baseUrl}/admin/verify-registration-result?success=User%20verified%20and%20notified.&email=${encodeURIComponent(email)}`);
 }
