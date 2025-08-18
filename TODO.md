@@ -17,6 +17,7 @@
 
   1. Only allow login for users with a non-null userVerified timestamp.
   2. If a user tries to log in before being verified, show a message: “Your registration is pending association approval.”
+  3. Upon login, go to an intro page that points out the features available to registered users.
 
 - Security
 

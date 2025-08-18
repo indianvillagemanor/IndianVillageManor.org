@@ -27,16 +27,26 @@ export async function GET(req: NextRequest) {
   await prisma.verificationToken.delete({
     where: { identifier_token: { identifier: email, token } },
   });
-  // Send congratulations + magic link email
+  // Send congratulations + magic link email (NextAuth verification link)
   try {
-    const magicLink = `${baseUrl}/auth/login?email=${encodeURIComponent(email)}`;
+    // Generate a NextAuth email sign-in token and link
+    const { randomBytes, createHash } = await import('crypto');
+    const token = randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    // Hash the token as NextAuth does: sha256(token + secret)
+    const secret = process.env.NEXTAUTH_SECRET || '';
+    const hashedToken = createHash('sha256').update(token + secret).digest('hex');
+    await prisma.verificationToken.create({
+      data: { identifier: email, token: hashedToken, expires },
+    });
+    const magicLink = `${baseUrl}/api/auth/callback/email?email=${encodeURIComponent(email)}&token=${token}`;
     const transport = nodemailer.createTransport(process.env.EMAIL_SERVER!);
     await transport.sendMail({
       to: email,
       from: process.env.EMAIL_FROM,
       subject: "Your registration is approved!",
-      text: `Congratulations! Your registration has been approved. You may now log in using this link: ${magicLink}`,
-      html: `<p>Congratulations! Your registration has been approved.</p><p><a href="${magicLink}">Log in to Indian Village Manor</a></p>`
+      text: `Congratulations! Your registration has been approved. You may now log in using this magic link: ${magicLink}\n\nThis link will expire in 7 days.`,
+      html: `<p>Congratulations! Your registration has been approved.</p><p><a href="${magicLink}">Log in to Indian Village Manor</a></p><p>This link will expire in 7 days.</p>`
     });
   } catch (e) {
     console.error("Failed to send approval email:", e);

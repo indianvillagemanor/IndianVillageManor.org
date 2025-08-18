@@ -29,7 +29,7 @@ const authOptions = {
           throw new Error("Failed to send verification email");
         }
       },
-      maxAge: 24 * 60 * 60, // Magic link valid for 24h
+  maxAge: 7 * 24 * 60 * 60, // Magic link valid for 7 days
     }),
   ],
   session: {
