@@ -63,12 +63,22 @@ const RegisterPage = () => {
     }
   }
 
+  // Show a message if the email is prefilled from the query string
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const prefilledEmail = params ? params.get("email") : null;
+
   return (
     <AuthCard
       cardLabel="Create an account!"
       exitLabel="Already have an account?"
       exitHref="/auth/login"
     >
+      {prefilledEmail && (
+        <div className="mb-4 p-3 rounded bg-yellow-100 text-yellow-800 border border-yellow-300">
+          <b>Notice:</b> The email address <span className="font-mono">{prefilledEmail}</span> is not registered in our system.<br />
+          Please register below, or check the spelling of your email address.
+        </div>
+      )}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
