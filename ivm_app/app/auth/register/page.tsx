@@ -22,6 +22,9 @@ const RegisterPage = () => {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
 
+
+  // Prefill email from query string if present
+  const [prefilled, setPrefilled] = useState(false);
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -31,6 +34,16 @@ const RegisterPage = () => {
       phone: ""
     }
   });
+
+  React.useEffect(() => {
+    if (prefilled) return;
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email");
+    if (email) {
+      form.setValue("email", email);
+      setPrefilled(true);
+    }
+  }, [form, prefilled]);
 
 
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {

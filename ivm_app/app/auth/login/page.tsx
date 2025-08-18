@@ -47,7 +47,7 @@ const LoginPage = () => {
           // Set email in sessionStorage before redirect
           sessionStorage.setItem("ivm_last_login_email", data.email);
           signIn("email", { email: data.email });
-          setSuccess("Requested sending of magic link!");
+          // Do not set success message here; NextAuth will handle redirect and message
         }
       })
     });

@@ -43,6 +43,27 @@ const authOptions = {
     newUser: "/", // after first registration
   },
   callbacks: {
+    async signIn(params: {
+      user: User | null;
+      account: import("next-auth").Account | null;
+      profile?: import("next-auth").Profile;
+      email?: { verificationRequest?: boolean };
+      credentials?: Record<string, unknown>;
+    }) {
+      const userEmail = params.user?.email || (typeof params.email === 'string' ? params.email : undefined);
+      if (!userEmail) return false;
+      const dbUser = await prisma.user.findUnique({ where: { email: userEmail } });
+      if (!dbUser) {
+        // Not registered: redirect to registration page with email prefilled
+        return "/auth/register?email=" + encodeURIComponent(userEmail);
+      }
+      // Not approved: userVerified is null
+      if (!dbUser.userVerified) {
+        return "/auth/pending-approval?email=" + encodeURIComponent(userEmail);
+      }
+      // Allow sign in
+      return true;
+    },
     async redirect({ baseUrl }: { url: string; baseUrl: string }) {
       // Always redirect to homepage after login
       return baseUrl;
