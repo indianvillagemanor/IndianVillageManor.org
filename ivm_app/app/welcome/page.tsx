@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import React from "react";
 
 export default async function WelcomePage() {
