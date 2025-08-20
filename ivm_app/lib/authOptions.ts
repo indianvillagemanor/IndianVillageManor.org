@@ -42,6 +42,7 @@ export const authOptions = {
   },
   pages: {
     signIn: "/auth/login",
+    verifyRequest: "/auth/verify-request",
     // You can customize other pages as needed
   },
   callbacks: {
