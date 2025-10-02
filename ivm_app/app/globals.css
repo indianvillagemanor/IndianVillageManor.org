@@ -13,12 +13,12 @@ body {
 }
 
 h1 {
-  font-family: 'Noto Serif', serif;
+  font-family: "Noto Serif", serif;
   font-weight: 300;
 }
 
 p {
-  font-family: 'Noto Serif', serif;
+  font-family: "Noto Serif", serif;
   font-weight: 600;
 }
 
@@ -27,12 +27,12 @@ li {
 }
 
 .scroll-offset {
-  scroll-margin-top: 36px; 
+  scroll-margin-top: 36px;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 46.67 15% 88%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;

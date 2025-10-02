@@ -7,15 +7,14 @@ on:
       - "!dependabot/*"
   workflow_dispatch:
 
-
 jobs:
   next-build:
     runs-on: ubuntu-latest
-    container: node:23-alpine3.20
+    container: node:24-alpine3.21
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: npm 
+      - name: npm
         working-directory: ./ivm_app
         run: |
           npm ci
@@ -76,4 +75,3 @@ jobs:
           echo "Pushing Image to GitHub Container Registry"
           docker push $GITHUB_REF_IMAGE
           docker push $GITHUB_BRANCH_IMAGE
-
