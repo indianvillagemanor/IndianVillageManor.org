@@ -44,7 +44,7 @@ export async function register(formData: FormData) {
     const verifyUrl = `${baseUrl}/api/admin/verify-registration?token=${adminToken}&email=${encodeURIComponent(values.email)}`;
     const denyUrl = `${baseUrl}/api/admin/deny-registration?token=${adminToken}&email=${encodeURIComponent(values.email)}`;
     const transport = nodemailer.createTransport(process.env.EMAIL_SERVER!);
-    const recipients = [...admins.map(a => a.email), "verify@indianvillagemanor.org"];
+  const recipients = [...admins.map((a: { email: string }) => a.email), "verify@indianvillagemanor.org"];
     console.log("Sending admin registration email to:", recipients);
     await transport.sendMail({
       to: recipients.join(","),
