@@ -30,7 +30,6 @@ COPY --chown=node:node components.json components.json
 COPY --chown=node:node postcss.config.mjs postcss.config.mjs
 COPY --chown=node:node tailwind.config.ts tailwind.config.ts
 COPY --chown=node:node eslint.config.mjs eslint.config.mjs
-COPY --chown=node:node next-env.d.ts next-env.d.ts
 
 # Copy source code
 COPY --chown=node:node actions actions
