@@ -48,6 +48,140 @@ This application is Dockerized for easy production deployment. To build and run 
 
 # How to deploy
 
+## Initial Server Setup (Fresh Ubuntu Installation)
+
+If you're starting with a fresh Ubuntu server that only has a root user, follow these steps:
+
+1. **Update the system and install essential packages:**
+
+   ```bash
+   apt update && apt upgrade -y
+   apt install -y curl wget gnupg lsb-release ca-certificates software-properties-common
+   ```
+
+2. **Create a sudo-enabled admin user:**
+
+   ```bash
+   # Create the ivm_admin user
+   adduser ivm_admin
+
+   # Add to sudo group
+   usermod -aG sudo ivm_admin
+
+   # Switch to the new user for remaining setup
+   su - ivm_admin
+   ```
+
+3. **Install Docker:**
+
+   ```bash
+   # Add Docker's official GPG key
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+   # Add Docker repository
+   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+   # Install Docker
+   sudo apt update
+   sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+   # Add ivm_admin to docker group to run docker without sudo
+   sudo usermod -aG docker ivm_admin
+
+   # Start and enable Docker
+   sudo systemctl start docker
+   sudo systemctl enable docker
+
+   # Log out and back in for group changes to take effect
+   exit
+   su - ivm_admin
+   ```
+
+4. **Install Nginx:**
+
+   ```bash
+   sudo apt install -y nginx
+   sudo systemctl start nginx
+   sudo systemctl enable nginx
+   ```
+
+5. **Install PostgreSQL:**
+
+   ```bash
+   sudo apt install -y postgresql postgresql-contrib
+   sudo systemctl start postgresql
+   sudo systemctl enable postgresql
+
+   # Set up PostgreSQL for the application
+   sudo -u postgres createuser --interactive --pwprompt ivm_app
+   sudo -u postgres createdb -O ivm_app ivm_production
+   sudo -u postgres createdb -O ivm_app ivm_development
+   ```
+
+6. **Install additional useful packages:**
+
+   ```bash
+   sudo apt install -y git htop ufw fail2ban
+   ```
+
+7. **Configure basic firewall:**
+   ```bash
+   sudo ufw default deny incoming
+   sudo ufw default allow outgoing
+   sudo ufw allow ssh
+   sudo ufw allow 'Nginx Full'
+   sudo ufw enable
+   ```
+
+## Production Deployment
+
+After completing the initial server setup:
+
+1. **Clone the repository and set up the application:**
+
+   ```bash
+   git clone https://github.com/levis501/IndianVillageManor.git
+   cd IndianVillageManor
+   ```
+
+2. **Set up environment variables:**
+
+   ```bash
+   cp ivm_app/.env.example ivm_app/.env
+   # Edit .env with your production values
+   nano ivm_app/.env
+   ```
+
+3. **Configure Nginx with SSL:**
+
+   ```bash
+   cd nginx
+   sudo ./setup.sh
+
+   # Obtain SSL certificates
+   sudo certbot --nginx -d indianvillagemanor.org -d www.indianvillagemanor.org
+   sudo certbot --nginx -d dev.indianvillagemanor.org
+   ```
+
+4. **Pull and run the Docker image from GitHub Container Registry:**
+
+   ```bash
+   # Login to GitHub Container Registry
+   echo $GITHUB_TOKEN | docker login ghcr.io -u <your-github-username> --password-stdin
+
+   # Pull and run production container
+   docker pull ghcr.io/levis501/indianvillagemanor:latest
+   docker run -d -p 3000:3000 --env-file ivm_app/.env --name ivm_app ghcr.io/levis501/indianvillagemanor:latest
+
+   # Pull and run development container (optional)
+   docker run -d -p 3001:3001 --env-file ivm_app/.env --name ivm_app_dev ghcr.io/levis501/indianvillagemanor:latest
+   ```
+
+5. **Reload Nginx:**
+   ```bash
+   sudo systemctl reload nginx
+   ```
+
 # How to test
 
 # How to setup automated database backups

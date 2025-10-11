@@ -13,7 +13,7 @@ This directory contains Nginx configuration files for serving the Indian Village
 
 ### Prerequisites
 
-1. Ubuntu server with root/sudo access
+1. Completed initial server setup (see main README.md)
 2. Domain names pointed to your server:
    - `indianvillagemanor.org`
    - `dev.indianvillagemanor.org`
