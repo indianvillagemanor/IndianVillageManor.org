@@ -72,16 +72,3 @@ else
     echo "HTTP-only configuration has errors. Please check the configuration files."
     exit 1
 fi
-    echo "2. Obtain SSL certificates with Let's Encrypt:"
-    echo "   sudo certbot --nginx -d indianvillagemanor.org -d www.indianvillagemanor.org"
-    echo "   sudo certbot --nginx -d dev.indianvillagemanor.org"
-    echo ""
-    echo "3. Reload Nginx to apply changes:"
-    echo "   sudo systemctl reload nginx"
-    echo ""
-    echo "4. Enable Nginx to start on boot:"
-    echo "   sudo systemctl enable nginx"
-else
-    echo "Nginx configuration has errors. Please check the configuration files."
-    exit 1
-fi
