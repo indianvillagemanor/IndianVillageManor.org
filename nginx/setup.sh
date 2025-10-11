@@ -18,17 +18,17 @@ if ! command -v certbot &> /dev/null; then
     apt install -y certbot python3-certbot-nginx
 fi
 
-# Copy configuration files to Nginx sites-available
-echo "Copying Nginx configuration files..."
-cp indianvillagemanor.org.conf /etc/nginx/sites-available/
-cp dev.indianvillagemanor.org.conf /etc/nginx/sites-available/
-cp www-redirect.conf /etc/nginx/sites-available/
+# First, set up HTTP-only configurations (SSL certs don't exist yet)
+echo "Setting up initial HTTP-only configurations..."
+cp indianvillagemanor.org-http.conf /etc/nginx/sites-available/
+cp dev.indianvillagemanor.org-http.conf /etc/nginx/sites-available/
+cp www-redirect-http.conf /etc/nginx/sites-available/
 
-# Enable sites by creating symlinks in sites-enabled
-echo "Enabling sites..."
-ln -sf /etc/nginx/sites-available/indianvillagemanor.org.conf /etc/nginx/sites-enabled/
-ln -sf /etc/nginx/sites-available/dev.indianvillagemanor.org.conf /etc/nginx/sites-enabled/
-ln -sf /etc/nginx/sites-available/www-redirect.conf /etc/nginx/sites-enabled/
+# Enable HTTP-only sites
+echo "Enabling HTTP-only sites..."
+ln -sf /etc/nginx/sites-available/indianvillagemanor.org-http.conf /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/dev.indianvillagemanor.org-http.conf /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/www-redirect-http.conf /etc/nginx/sites-enabled/
 
 # Remove default Nginx site if it exists
 if [ -f /etc/nginx/sites-enabled/default ]; then
@@ -36,18 +36,42 @@ if [ -f /etc/nginx/sites-enabled/default ]; then
     rm /etc/nginx/sites-enabled/default
 fi
 
-# Test Nginx configuration
-echo "Testing Nginx configuration..."
+# Test HTTP-only configuration
+echo "Testing HTTP-only Nginx configuration..."
 nginx -t
 
 if [ $? -eq 0 ]; then
-    echo "Nginx configuration is valid!"
+    echo "HTTP-only configuration is valid!"
     
+    # Reload nginx with HTTP-only config
+    systemctl reload nginx
+    
+    echo ""
+    echo "Phase 1 Complete: HTTP-only setup"
+    echo "================================="
+    echo ""
     echo "Next steps:"
     echo "1. Make sure your Docker containers are running:"
     echo "   - Main site on port 3000"
     echo "   - Dev site on port 3001"
     echo ""
+    echo "2. Test HTTP access (should work now):"
+    echo "   - http://indianvillagemanor.org"
+    echo "   - http://dev.indianvillagemanor.org"
+    echo ""
+    echo "3. Obtain SSL certificates:"
+    echo "   sudo certbot --nginx -d indianvillagemanor.org -d www.indianvillagemanor.org"
+    echo "   sudo certbot --nginx -d dev.indianvillagemanor.org"
+    echo ""
+    echo "4. After getting SSL certificates, run the SSL setup:"
+    echo "   sudo ./setup-ssl.sh"
+    echo ""
+    echo "5. Enable Nginx to start on boot:"
+    echo "   sudo systemctl enable nginx"
+else
+    echo "HTTP-only configuration has errors. Please check the configuration files."
+    exit 1
+fi
     echo "2. Obtain SSL certificates with Let's Encrypt:"
     echo "   sudo certbot --nginx -d indianvillagemanor.org -d www.indianvillagemanor.org"
     echo "   sudo certbot --nginx -d dev.indianvillagemanor.org"
