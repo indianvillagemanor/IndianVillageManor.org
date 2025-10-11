@@ -118,6 +118,15 @@ If you're starting with a fresh Ubuntu server that only has a root user, follow 
    sudo -u postgres createdb -O ivm_app ivm_development
    ```
 
+   **Note:** During the `createuser` command, you'll be prompted for:
+
+   - **"Enter password for new role"**: This is the database password for the `ivm_app` user. Choose a strong password and save it securely - you'll need it for your application's `DATABASE_URL` in the `.env` file.
+   - **"Shall the new role be a superuser?"**: Answer **No** for security. A superuser has unrestricted access to the entire database system, which is unnecessary and risky for an application user.
+   - **"Shall the new role be allowed to create databases?"**: Answer **No** since we're creating the databases separately.
+   - **"Shall the new role be allowed to create more new roles?"**: Answer **No** for security.
+
+   The `ivm_app` user will have sufficient permissions to read/write data in the databases we created without excessive privileges.
+
 6. **Install additional useful packages:**
 
    ```bash
