@@ -69,11 +69,7 @@ const SiteMenu = () => {
 
   const { status } = useSession();
   const loggedIn = status === "authenticated";
-  const loginDisabled = process.env.NEXT_PUBLIC_LOGIN_DISABLED === 'true';
-
-  // Log values for debugging
-  console.log('SiteMenu render - process.env.NEXT_PUBLIC_LOGIN_DISABLED:', process.env.NEXT_PUBLIC_LOGIN_DISABLED);
-  console.log('SiteMenu render - loginDisabled:', loginDisabled);
+  const loginDisabled = true; // Set to true to disable login-related menu items
 
   return (
     <header style={headerStyle}>
