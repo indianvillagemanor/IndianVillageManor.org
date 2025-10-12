@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  ivm_app:
+    image: ivm_app
+    container_name: ivm_app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  ivm_app_dev:
+    image: ivm_app
+    container_name: ivm_app_dev
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    profiles:
+      - dev
