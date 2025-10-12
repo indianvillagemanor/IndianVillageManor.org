@@ -69,6 +69,7 @@ const SiteMenu = () => {
 
   const { status } = useSession();
   const loggedIn = status === "authenticated";
+  const loginDisabled = process.env.NEXT_PUBLIC_LOGIN_DISABLED === 'true';
 
   return (
     <header style={headerStyle}>
@@ -88,43 +89,47 @@ const SiteMenu = () => {
               <li><Link href="/#home" onClick={closeMenu}>Home</Link></li>
               <li><Link href="/#floorplans" onClick={closeMenu}>Floor Plans</Link></li>
               <li><Link href="/#contact" onClick={closeMenu}>Contact</Link></li>
-              <li><hr /></li>
-              {
-                loggedIn
-                  ?
-                  <>
-                    <li><Link href="/calendar" onClick={closeMenu}>Calendar</Link></li>
-                    <li><Link href="/newsletter" onClick={closeMenu}>Newsletter</Link></li>
-                    <li>
-                      <span
-                        style={{
-                          color: '#bbb',
-                          cursor: 'not-allowed',
-                          pointerEvents: 'none',
-                          opacity: 0.7,
-                          userSelect: 'none',
-                        }}
-                        aria-disabled="true"
-                        tabIndex={-1}
-                      >
-                        Tickets
-                      </span>
-                    </li>
-                    <li><hr /></li>
-                    <li>
-                      <button
-                        style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", padding: 0, font: "inherit" }}
-                        onClick={() => {
-                          closeMenu();
-                          signOut({ callbackUrl: "/" });
-                        }}
-                      >
-                        Logout
-                      </button>
-                    </li>
-                  </>
-                  : <li><Link href="/auth/login" onClick={closeMenu}>Login</Link></li>
-              }
+              {!loginDisabled && (
+                <>
+                  <li><hr /></li>
+                  {
+                    loggedIn
+                      ?
+                      <>
+                        <li><Link href="/calendar" onClick={closeMenu}>Calendar</Link></li>
+                        <li><Link href="/newsletter" onClick={closeMenu}>Newsletter</Link></li>
+                        <li>
+                          <span
+                            style={{
+                              color: '#bbb',
+                              cursor: 'not-allowed',
+                              pointerEvents: 'none',
+                              opacity: 0.7,
+                              userSelect: 'none',
+                            }}
+                            aria-disabled="true"
+                            tabIndex={-1}
+                          >
+                            Tickets
+                          </span>
+                        </li>
+                        <li><hr /></li>
+                        <li>
+                          <button
+                            style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", padding: 0, font: "inherit" }}
+                            onClick={() => {
+                              closeMenu();
+                              signOut({ callbackUrl: "/" });
+                            }}
+                          >
+                            Logout
+                          </button>
+                        </li>
+                      </>
+                      : <li><Link href="/auth/login" onClick={closeMenu}>Login</Link></li>
+                  }
+                </>
+              )}
             </ul>
           </div>
         </div>

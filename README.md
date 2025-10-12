@@ -6,7 +6,7 @@ Full stack for IVM Condo Website
 
 1. Clone the repository
 2. Install dependencies
-3. Start the server with `npm start dev` in `ivm_app`
+3. Start the server with `npm run dev` in `ivm_app`
 4. Open your browser and navigate to `http://localhost:3000`
 
 # How to build for production
