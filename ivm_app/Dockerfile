@@ -1,7 +1,7 @@
 FROM node:24-alpine3.21
 
-ENV NODE_ENV production
-ENV NPM_CONFIG_LOGLEVEL warn
+ENV NODE_ENV=production
+ENV NPM_CONFIG_LOGLEVEL=warn
 
 RUN mkdir /app && chown -R node:node /app
 WORKDIR /app
@@ -42,4 +42,4 @@ COPY --chown=node:node schemas schemas
 RUN npm run build
 
 EXPOSE 3000
-CMD npm start
+CMD ["npm", "start"]
