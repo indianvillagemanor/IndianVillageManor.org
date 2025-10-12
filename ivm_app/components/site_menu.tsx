@@ -71,6 +71,10 @@ const SiteMenu = () => {
   const loggedIn = status === "authenticated";
   const loginDisabled = process.env.NEXT_PUBLIC_LOGIN_DISABLED === 'true';
 
+  // Log values for debugging
+  console.log('SiteMenu render - process.env.NEXT_PUBLIC_LOGIN_DISABLED:', process.env.NEXT_PUBLIC_LOGIN_DISABLED);
+  console.log('SiteMenu render - loginDisabled:', loginDisabled);
+
   return (
     <header style={headerStyle}>
       <Image
