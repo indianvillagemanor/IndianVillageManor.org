@@ -30,6 +30,11 @@ This application is Dockerized for easy production deployment. To build and run 
    ```
 
    - This will start the app in detached mode, mapping port 3000 on your server to the app.
+   - To run the continer at port 3001 (for development), use:
+
+   ```bash
+   docker run -d -p 3001:3000 --env-file ivm_app/.env.dev --name ivm_app_dev ivm_app
+   ```
 
 4. Check logs and status:
    ```bash
