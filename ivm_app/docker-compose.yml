@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ivm_postgres
+    environment:
+      POSTGRES_DB: ivm_db
+      POSTGRES_USER: ivm_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - ivm_network
+
+  # Production App
   ivm_app:
     image: ivm_app
     container_name: ivm_app
@@ -8,15 +26,31 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    depends_on:
+      - postgres
     restart: unless-stopped
+    networks:
+      - ivm_network
 
+  # Development App
   ivm_app_dev:
     image: ivm_app
     container_name: ivm_app_dev
     ports:
       - "3001:3000"
     env_file:
-      - .env
+      - .env.dev
+    depends_on:
+      - postgres
     restart: unless-stopped
     profiles:
       - dev
+    networks:
+      - ivm_network
+
+volumes:
+  postgres_data:
+
+networks:
+  ivm_network:
+    driver: bridge
