@@ -47,7 +47,7 @@ export const authOptions = {
   },
   callbacks: {
     async signIn({ user }: {
-      user: import("next-auth").User | import("@auth/core/adapters").AdapterUser;
+      user: import("next-auth").User | import("next-auth/adapters").AdapterUser;
     }) {
       const userEmail = user?.email;
       if (!userEmail) return false;
