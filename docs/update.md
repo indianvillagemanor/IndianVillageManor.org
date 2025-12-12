@@ -256,28 +256,48 @@ sudo kill -9 <PID>
 
 If you get "unable to find user node: no matching entries in passwd file":
 
-```bash
-# Option A: Try a different Node.js base image
-# Edit Dockerfile and change the first line from:
-# FROM node:24-alpine3.21
-# to:
-# FROM node:24-alpine
+**This typically occurs when the Docker image wasn't built properly on the production server.**
 
-# Then rebuild:
-docker-compose down
+**First, try a complete clean rebuild:**
+```bash
+# Stop services and clean Docker cache
+./manage.sh stop
+docker system prune -f
 docker rmi ivm_app
+
+# Pull fresh base image and rebuild
+docker pull node:24-alpine3.21
 docker build --no-cache -t ivm_app .
 ./manage.sh start
+```
 
-# Option B: Use root user temporarily
-# Edit Dockerfile and comment out the "USER node" line
-# Then rebuild as above
+**If the issue persists, check for production server differences:**
+```bash
+# Check Docker version compatibility
+docker --version
 
-# Option C: Run with sudo (if permission issues)
-sudo ./manage.sh stop
-sudo docker rmi ivm_app
-sudo docker build --no-cache -t ivm_app .
-sudo ./manage.sh start
+# Check system architecture (production may be different from local)
+uname -m
+docker info | grep Architecture
+
+# Check available disk space (builds can fail with low space)
+df -h
+
+# Check for corrupted Docker installation
+docker run --rm node:24-alpine3.21 whoami
+# Should output: node
+```
+
+**Alternative solutions if clean rebuild fails:**
+```bash
+# Option A: Try different platform specification
+docker build --platform linux/amd64 --no-cache -t ivm_app .
+
+# Option B: Use root user temporarily (for testing)
+# Edit Dockerfile and comment out "USER node" line, then rebuild
+
+# Option C: Use different Node base image
+# Change Dockerfile first line to: FROM node:24-alpine
 ```
 
 ### Rollback Procedure
