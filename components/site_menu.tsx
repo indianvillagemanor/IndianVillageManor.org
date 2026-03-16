@@ -109,6 +109,21 @@ const SiteMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [committees, setCommittees] = useState<Array<{ id: string; name: string; description: string }>>([]);
+  const [hasNewsletters, setHasNewsletters] = useState(false);
+
+  // Check for published newsletters (public — no auth required)
+  useEffect(() => {
+    fetch('/api/newsletters')
+      .then(res => res.json())
+      .then(data => {
+        if (data.newsletters && data.newsletters.length > 0) {
+          setHasNewsletters(true);
+        }
+      })
+      .catch(() => {
+        // Non-critical; newsletter menu item simply won't appear
+      });
+  }, []);
 
   // Fetch committees when user is authenticated
   useEffect(() => {
@@ -222,6 +237,21 @@ const SiteMenu = () => {
                   Contact
                 </Link>
               </li>
+
+              {/* Newsletter link — visible to all users when published newsletters exist */}
+              {hasNewsletters && (
+                <li style={{ padding: 0 }}>
+                  <Link
+                    href="/newsletters"
+                    onClick={closeMenu}
+                    style={getMenuItemStyle('newsletters')}
+                    onMouseEnter={() => setHoveredItem('newsletters')}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
+                    Newsletters
+                  </Link>
+                </li>
+              )}
 
               {/* Committee links for authenticated users */}
               {session && committees.length > 0 && (

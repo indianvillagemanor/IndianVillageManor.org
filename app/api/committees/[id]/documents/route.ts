@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { logAuditEvent } from '@/lib/audit';
+import { generatePdfThumbnail } from '@/lib/pdf-thumbnail';
 import path from 'path';
 import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
@@ -90,6 +91,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   const file = formData.get('file') as File | null;
   const title = (formData.get('title') as string | null)?.trim();
+  const isNewsletterRaw = formData.get('isNewsletter') as string | null;
+  const isNewsletter = isNewsletterRaw === 'true';
 
   if (!file) {
     return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -112,6 +115,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   if (!ALLOWED_EXTENSIONS.includes(ext)) {
     return NextResponse.json(
       { error: `Invalid file extension. Allowed: .pdf, .jpg, .jpeg, .png` },
+      { status: 400 }
+    );
+  }
+
+  // Newsletters must be PDFs
+  if (isNewsletter && ext !== '.pdf') {
+    return NextResponse.json(
+      { error: 'Only PDF files can be marked as newsletters' },
+      { status: 400 }
+    );
+  }
+
+  // Newsletter checkbox is only valid for committees with the newsletter feature
+  if (isNewsletter && !committee.hasNewsletterFeature) {
+    return NextResponse.json(
+      { error: 'This committee does not support newsletter documents' },
       { status: 400 }
     );
   }
@@ -142,15 +161,27 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const buffer = Buffer.from(await file.arrayBuffer());
   await fs.writeFile(filePath, buffer);
 
+  // Pre-generate the document ID so the thumbnail filename matches
+  const documentId = uuidv4();
+
+  // Generate thumbnail if this is a newsletter PDF
+  let thumbnailPath: string | null = null;
+  if (isNewsletter) {
+    thumbnailPath = await generatePdfThumbnail(filePath, documentId);
+  }
+
   // Create Document record
   const document = await prisma.document.create({
     data: {
+      id: documentId,
       committeeId,
       title,
       filename: relativeFilename,
       published: false,
       archived: false,
       deleted: false,
+      isNewsletter,
+      thumbnailPath,
       uploadedBy: session.user.id,
     },
   });
@@ -168,6 +199,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       filename: relativeFilename,
       fileSize: file.size,
       mimeType: file.type,
+      isNewsletter,
+      thumbnailGenerated: thumbnailPath !== null,
     },
     ipAddress:
       request.headers.get('x-forwarded-for') ||
@@ -227,5 +260,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
   }
 
-  return NextResponse.json({ documents, canManage });
+  return NextResponse.json({
+    documents,
+    canManage,
+    hasNewsletterFeature: committee.hasNewsletterFeature,
+  });
 }

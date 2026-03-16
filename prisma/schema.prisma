@@ -75,31 +75,35 @@ model Role {
 }
 
 model Committee {
-  id          String     @id @default(uuid())
-  name        String
-  description String?
-  members     User[]     @relation("Memberships")
-  documents   Document[]
+  id                   String     @id @default(uuid())
+  name                 String
+  description          String?
+  hasNewsletterFeature Boolean    @default(false)
+  members              User[]     @relation("Memberships")
+  documents            Document[]
 }
 
 model Document {
-  id          String    @id @default(uuid())
-  committeeId String
-  committee   Committee @relation(fields: [committeeId], references: [id])
-  title       String
-  filename    String    // path within mounted volume
-  published   Boolean   @default(false)
-  archived    Boolean   @default(false)
-  deleted     Boolean   @default(false)
-  uploadedBy  String    // User.id reference
-  uploadedAt  DateTime  @default(now())
-  deletedBy   String?   // User.id reference
-  deletedAt   DateTime?
+  id            String    @id @default(uuid())
+  committeeId   String
+  committee     Committee @relation(fields: [committeeId], references: [id])
+  title         String
+  filename      String    // path within mounted volume
+  published     Boolean   @default(false)
+  archived      Boolean   @default(false)
+  deleted       Boolean   @default(false)
+  isNewsletter  Boolean   @default(false)
+  thumbnailPath String?   // relative path to first-page thumbnail image
+  uploadedBy    String    // User.id reference
+  uploadedAt    DateTime  @default(now())
+  deletedBy     String?   // User.id reference
+  deletedAt     DateTime?
 
   @@index([committeeId])
   @@index([published])
   @@index([archived])
   @@index([deleted])
+  @@index([isNewsletter])
 }
 
 model Event {

@@ -12,6 +12,8 @@ interface DocumentItem {
   published: boolean;
   archived: boolean;
   deleted: boolean;
+  isNewsletter: boolean;
+  thumbnailPath: string | null;
   uploadedAt: string;
   uploadedBy: string;
   deletedAt: string | null;
@@ -172,6 +174,12 @@ const draftBadge: React.CSSProperties = {
   color: '#374151',
 };
 
+const newsletterBadge: React.CSSProperties = {
+  ...badgeBase,
+  backgroundColor: '#dbeafe',
+  color: '#1e40af',
+};
+
 const actionButtonStyle: React.CSSProperties = {
   padding: '6px 14px',
   border: '1px solid #ccc',
@@ -223,6 +231,10 @@ function getBasename(filepath: string): string {
   return filepath.split('/').pop() || filepath;
 }
 
+function isPdf(filename: string): boolean {
+  return filename.toLowerCase().endsWith('.pdf');
+}
+
 function getStatusBadge(doc: DocumentItem) {
   if (doc.deleted) return <span style={deletedBadge}>Deleted</span>;
   if (doc.published) return <span style={publishedBadge}>Published</span>;
@@ -240,6 +252,7 @@ export default function DocumentsManagePage() {
 
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [committeeName, setCommitteeName] = useState('');
+  const [hasNewsletterFeature, setHasNewsletterFeature] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -247,6 +260,7 @@ export default function DocumentsManagePage() {
   // Upload form
   const [title, setTitle] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [isNewsletterUpload, setIsNewsletterUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -272,6 +286,7 @@ export default function DocumentsManagePage() {
         return;
       }
       setDocuments(data.documents || []);
+      setHasNewsletterFeature(data.hasNewsletterFeature || false);
     } catch {
       setError('Failed to load documents');
     } finally {
@@ -308,10 +323,23 @@ export default function DocumentsManagePage() {
     }
   }, [status, session, router, fetchDocuments, fetchCommitteeName]);
 
+  // When file changes, reset the newsletter checkbox if not a PDF
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] || null;
+    setFile(selected);
+    if (selected && !isPdf(selected.name)) {
+      setIsNewsletterUpload(false);
+    }
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !title.trim()) {
       setUploadError('Title and file are required');
+      return;
+    }
+    if (isNewsletterUpload && !isPdf(file.name)) {
+      setUploadError('Only PDF files can be marked as newsletters');
       return;
     }
     setUploading(true);
@@ -321,6 +349,9 @@ export default function DocumentsManagePage() {
     const formData = new FormData();
     formData.append('title', title.trim());
     formData.append('file', file);
+    if (isNewsletterUpload) {
+      formData.append('isNewsletter', 'true');
+    }
 
     try {
       const res = await fetch(`/api/committees/${committeeId}/documents`, {
@@ -332,9 +363,11 @@ export default function DocumentsManagePage() {
         setUploadError(data.error || 'Upload failed');
         return;
       }
-      setSuccess(`Document "${title.trim()}" uploaded successfully.`);
+      const newsLabel = isNewsletterUpload ? ' (Newsletter)' : '';
+      setSuccess(`Document "${title.trim()}"${newsLabel} uploaded successfully.`);
       setTitle('');
       setFile(null);
+      setIsNewsletterUpload(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
       // Refresh documents
       await fetchDocuments();
@@ -347,7 +380,7 @@ export default function DocumentsManagePage() {
 
   const handleAction = async (
     docId: string,
-    action: 'publish' | 'archive' | 'delete' | 'restore' | 'permanent'
+    action: 'publish' | 'archive' | 'delete' | 'restore' | 'permanent' | 'set_newsletter' | 'unset_newsletter'
   ) => {
     setProcessing(docId + action);
     setError('');
@@ -356,7 +389,7 @@ export default function DocumentsManagePage() {
     try {
       let res: Response;
 
-      if (action === 'publish' || action === 'archive') {
+      if (action === 'publish' || action === 'archive' || action === 'set_newsletter' || action === 'unset_newsletter') {
         res = await fetch(`/api/documents/${docId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -390,6 +423,8 @@ export default function DocumentsManagePage() {
         delete: 'moved to trash',
         restore: 'restored',
         permanent: 'permanently deleted',
+        set_newsletter: 'marked as newsletter',
+        unset_newsletter: 'unmarked as newsletter',
       };
       setSuccess(`Document ${actionLabels[action]} successfully.`);
       await fetchDocuments();
@@ -457,11 +492,47 @@ export default function DocumentsManagePage() {
                 ref={fileInputRef}
                 style={{ ...inputStyle, padding: '7px' }}
                 accept=".pdf,.jpg,.jpeg,.png"
-                onChange={e => setFile(e.target.files?.[0] || null)}
+                onChange={handleFileChange}
                 disabled={uploading}
               />
             </div>
           </div>
+
+          {/* Newsletter checkbox — only shown for committees with newsletter feature */}
+          {hasNewsletterFeature && (
+            <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {(() => {
+                const newsletterDisabled = uploading || !file || !isPdf(file.name);
+                return (
+                  <>
+                    <input
+                      id="upload-is-newsletter"
+                      type="checkbox"
+                      checked={isNewsletterUpload}
+                      onChange={e => setIsNewsletterUpload(e.target.checked)}
+                      disabled={newsletterDisabled}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <label
+                      htmlFor="upload-is-newsletter"
+                      style={{
+                        fontSize: '0.9rem',
+                        fontWeight: 'bold',
+                        color: newsletterDisabled ? '#aaa' : '#1e40af',
+                        cursor: newsletterDisabled ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      Newsletter{' '}
+                      <span style={{ fontWeight: 'normal', color: '#666' }}>
+                        (PDF files only — a thumbnail will be generated automatically)
+                      </span>
+                    </label>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+
           <button
             type="submit"
             style={{
@@ -487,7 +558,10 @@ export default function DocumentsManagePage() {
             const isProcessing =
               processing === doc.id + 'publish' ||
               processing === doc.id + 'archive' ||
-              processing === doc.id + 'delete';
+              processing === doc.id + 'delete' ||
+              processing === doc.id + 'set_newsletter' ||
+              processing === doc.id + 'unset_newsletter';
+            const canBeNewsletter = isPdf(doc.filename);
             return (
               <div key={doc.id} style={cardStyle}>
                 <div style={cardHeaderStyle}>
@@ -501,7 +575,10 @@ export default function DocumentsManagePage() {
                         day: 'numeric',
                       })}
                     </div>
-                    <div style={{ marginTop: '6px' }}>{getStatusBadge(doc)}</div>
+                    <div style={{ marginTop: '6px' }}>
+                      {getStatusBadge(doc)}
+                      {doc.isNewsletter && <span style={newsletterBadge}>Newsletter</span>}
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     {/* Download link */}
@@ -513,6 +590,29 @@ export default function DocumentsManagePage() {
                     >
                       View
                     </a>
+
+                    {/* Newsletter toggle — only for committees with newsletter feature and PDF files */}
+                    {hasNewsletterFeature && canBeNewsletter && (
+                      doc.isNewsletter ? (
+                        <button
+                          style={{ ...actionButtonStyle, color: '#6b21a8', borderColor: '#d8b4fe', ...(isProcessing ? disabledButtonStyle : {}) }}
+                          onClick={() => handleAction(doc.id, 'unset_newsletter')}
+                          disabled={isProcessing}
+                          title="Remove newsletter designation"
+                        >
+                          Unmark Newsletter
+                        </button>
+                      ) : (
+                        <button
+                          style={{ ...actionButtonStyle, color: '#1e40af', borderColor: '#bfdbfe', ...(isProcessing ? disabledButtonStyle : {}) }}
+                          onClick={() => handleAction(doc.id, 'set_newsletter')}
+                          disabled={isProcessing}
+                          title="Mark as newsletter (generates thumbnail)"
+                        >
+                          Mark as Newsletter
+                        </button>
+                      )
+                    )}
 
                     {/* Draft (not published, not archived): Publish, Delete */}
                     {!doc.published && !doc.archived && (
@@ -606,7 +706,10 @@ export default function DocumentsManagePage() {
                         })}</>
                       )}
                     </div>
-                    <div style={{ marginTop: '6px' }}>{getStatusBadge(doc)}</div>
+                    <div style={{ marginTop: '6px' }}>
+                      {getStatusBadge(doc)}
+                      {doc.isNewsletter && <span style={newsletterBadge}>Newsletter</span>}
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     <button

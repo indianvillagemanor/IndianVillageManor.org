@@ -26,6 +26,7 @@ interface CommitteeDetail {
   id: string;
   name: string;
   description: string | null;
+  hasNewsletterFeature: boolean;
   members: CommitteeMember[];
   documents: CommitteeDocument[];
 }
@@ -246,6 +247,7 @@ export default function AdminCommitteePage() {
   const [committee, setCommittee] = useState<CommitteeDetail | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [hasNewsletterFeature, setHasNewsletterFeature] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [memberAction, setMemberAction] = useState<string | null>(null);
@@ -266,6 +268,7 @@ export default function AdminCommitteePage() {
       setCommittee(data.committee);
       setName(data.committee.name);
       setDescription(data.committee.description || '');
+      setHasNewsletterFeature(data.committee.hasNewsletterFeature || false);
     } catch {
       setError('Failed to load committee');
     } finally {
@@ -323,7 +326,7 @@ export default function AdminCommitteePage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), description: description.trim() || null }),
+        body: JSON.stringify({ name: name.trim(), description: description.trim() || null, hasNewsletterFeature }),
       });
 
       const data = await res.json();
@@ -337,7 +340,7 @@ export default function AdminCommitteePage() {
         setSuccess('Committee created successfully!');
         router.push(`/admin/committees/${data.committee.id}`);
       } else {
-        setCommittee(prev => prev ? { ...prev, name: data.committee.name, description: data.committee.description } : prev);
+        setCommittee(prev => prev ? { ...prev, name: data.committee.name, description: data.committee.description, hasNewsletterFeature: data.committee.hasNewsletterFeature } : prev);
         setSuccess('Committee updated successfully!');
       }
     } catch {
@@ -482,6 +485,20 @@ export default function AdminCommitteePage() {
             maxLength={500}
             disabled={saving}
           />
+        </div>
+
+        <div style={{ ...fieldGroupStyle, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <input
+            id="has-newsletter-feature"
+            type="checkbox"
+            checked={hasNewsletterFeature}
+            onChange={e => setHasNewsletterFeature(e.target.checked)}
+            disabled={saving}
+            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+          />
+          <label htmlFor="has-newsletter-feature" style={{ ...labelStyle, marginBottom: 0, cursor: 'pointer' }}>
+            Newsletter Committee — members can mark PDF documents as newsletters
+          </label>
         </div>
 
         <div style={buttonRowStyle}>
