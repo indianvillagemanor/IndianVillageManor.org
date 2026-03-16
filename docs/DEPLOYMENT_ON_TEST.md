@@ -253,13 +253,14 @@ What happens:
 ## 10. Seed Database (First Deployment Only)
 
 ```bash
-docker compose -f docker-compose.prod.yml run --rm --entrypoint "node node_modules/prisma/build/index.js db seed" migrate
+docker compose -f docker-compose.prod.yml run --rm --entrypoint sh migrate -lc 'export PATH=/app/node_modules/.bin:$PATH && prisma db seed'
 ```
 
 Why this command:
 
 - The `app` runtime image is slim and does not include the Prisma CLI.
 - The `migrate` image is built from the full builder stage and has the Prisma CLI and seed dependencies.
+- `tsx` is installed in `node_modules/.bin`, so this command explicitly adds that path before running `prisma db seed`.
 
 ## 11. Verify Deployment
 
