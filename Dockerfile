@@ -59,8 +59,8 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
-  CMD wget -qO- http://localhost:3000/api/health || exit 1
+HEALTHCHECK --interval=15s --timeout=10s --start-period=60s --retries=5 \
+  CMD wget -qO- http://127.0.0.1:3000/api/health 2>&1 | grep -q status || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]

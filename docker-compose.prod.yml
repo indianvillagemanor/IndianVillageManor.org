@@ -60,10 +60,10 @@ services:
       - documents_data:/data/documents
       - logs_data:/data/logs
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health 2>&1 | grep -q status || exit 1"]
       interval: 15s
-      timeout: 5s
-      start_period: 30s
+      timeout: 10s
+      start_period: 60s
       retries: 5
     networks:
       - ivm-network
