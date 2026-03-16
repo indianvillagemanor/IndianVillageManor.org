@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { logAuditEvent } from '@/lib/audit';
+import { generatePdfThumbnail, deletePdfThumbnail } from '@/lib/pdf-thumbnail';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -32,7 +33,7 @@ async function getAuthorizedUser(sessionUserId: string) {
   });
 }
 
-// PATCH /api/documents/[id] - Publish or archive a document
+// PATCH /api/documents/[id] - Publish, archive, or toggle newsletter on a document
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const session = await getServerSession(authOptions);
 
@@ -79,13 +80,98 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
   const { action } = body;
 
-  if (action !== 'publish' && action !== 'archive') {
+  if (action !== 'publish' && action !== 'archive' && action !== 'set_newsletter' && action !== 'unset_newsletter') {
     return NextResponse.json(
-      { error: 'action must be "publish" or "archive"' },
+      { error: 'action must be "publish", "archive", "set_newsletter", or "unset_newsletter"' },
       { status: 400 }
     );
   }
 
+  // Handle newsletter toggling
+  if (action === 'set_newsletter' || action === 'unset_newsletter') {
+    // Fetch committee to verify it supports newsletters
+    const committee = await prisma.committee.findUnique({
+      where: { id: document.committeeId },
+    });
+
+    if (action === 'set_newsletter') {
+      if (!committee?.hasNewsletterFeature) {
+        return NextResponse.json(
+          { error: 'This committee does not support newsletter documents' },
+          { status: 400 }
+        );
+      }
+
+      // Only PDFs can be newsletters
+      const ext = path.extname(document.filename).toLowerCase();
+      if (ext !== '.pdf') {
+        return NextResponse.json(
+          { error: 'Only PDF files can be marked as newsletters' },
+          { status: 400 }
+        );
+      }
+
+      // Generate thumbnail if not already present
+      let thumbnailPath = document.thumbnailPath;
+      if (!thumbnailPath) {
+        const filePath = path.join(DOCUMENTS_BASE, document.filename);
+        thumbnailPath = await generatePdfThumbnail(filePath, documentId);
+      }
+
+      const updated = await prisma.document.update({
+        where: { id: documentId },
+        data: { isNewsletter: true, thumbnailPath },
+      });
+
+      await logAuditEvent({
+        userId: session.user.id,
+        action: 'document_newsletter_set',
+        entityType: 'Document',
+        entityId: documentId,
+        success: true,
+        details: {
+          committeeId: document.committeeId,
+          title: document.title,
+          thumbnailGenerated: thumbnailPath !== null,
+        },
+        ipAddress:
+          request.headers.get('x-forwarded-for') ||
+          request.headers.get('x-real-ip') ||
+          'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+      });
+
+      return NextResponse.json({ document: updated });
+    } else {
+      // unset_newsletter: remove newsletter flag and delete thumbnail
+      if (document.thumbnailPath) {
+        await deletePdfThumbnail(document.thumbnailPath);
+      }
+
+      const updated = await prisma.document.update({
+        where: { id: documentId },
+        data: { isNewsletter: false, thumbnailPath: null },
+      });
+
+      await logAuditEvent({
+        userId: session.user.id,
+        action: 'document_newsletter_unset',
+        entityType: 'Document',
+        entityId: documentId,
+        success: true,
+        details: { committeeId: document.committeeId, title: document.title },
+        ipAddress:
+          request.headers.get('x-forwarded-for') ||
+          request.headers.get('x-real-ip') ||
+          'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+      });
+
+      return NextResponse.json({ document: updated });
+    }
+  }
+
+  // Handle publish/archive
   let updateData: Record<string, boolean>;
   let auditAction: string;
 

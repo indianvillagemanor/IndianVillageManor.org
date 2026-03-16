@@ -86,7 +86,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 
   const body = await request.json();
-  const { name, description } = body;
+  const { name, description, hasNewsletterFeature } = body;
 
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
     return NextResponse.json({ error: 'Committee name is required' }, { status: 400 });
@@ -97,6 +97,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     data: {
       name: name.trim(),
       description: description !== undefined ? (description ? description.trim() : null) : existing.description,
+      hasNewsletterFeature: typeof hasNewsletterFeature === 'boolean' ? hasNewsletterFeature : existing.hasNewsletterFeature,
     },
   });
 

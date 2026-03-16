@@ -29,6 +29,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Install poppler-utils for PDF first-page thumbnail generation (pdftoppm)
+RUN apk add --no-cache poppler-utils
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -46,7 +49,7 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 
 # Create data directories
-RUN mkdir -p /data/documents /data/logs && chown -R nextjs:nodejs /data
+RUN mkdir -p /data/documents /data/documents/thumbnails /data/logs && chown -R nextjs:nodejs /data
 
 # Copy entrypoint
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./

@@ -39,6 +39,7 @@ export async function GET(_request: NextRequest) {
     id: c.id,
     name: c.name,
     description: c.description,
+    hasNewsletterFeature: c.hasNewsletterFeature,
     memberCount: c._count.members,
     documentCount: c._count.documents,
   }));

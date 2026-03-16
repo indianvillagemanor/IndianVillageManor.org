@@ -12,46 +12,54 @@ interface RouteParams {
 }
 
 // GET /api/documents/[id]/download - Serve a document file
+// Published newsletters are accessible to all users (including anonymous).
+// All other documents require a verified, authenticated session.
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const { id: documentId } = await params;
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      roles: true,
-      committees: { select: { id: true } },
-    },
-  });
-
-  if (!user || user.verificationStatus !== 'verified') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
 
   const document = await prisma.document.findUnique({ where: { id: documentId } });
   if (!document) {
     return NextResponse.json({ error: 'Document not found' }, { status: 404 });
   }
 
-  // Deleted documents are not accessible
+  // Deleted documents are never accessible
   if (document.deleted) {
     return NextResponse.json({ error: 'Document not found' }, { status: 404 });
   }
 
-  const isAdmin = user.roles.some(r => r.name === 'dbadmin');
-  const isPublisher = user.roles.some(r => r.name === 'publisher');
-  const isMember = user.committees.some(c => c.id === document.committeeId);
-  const canManage = isAdmin || (isPublisher && isMember);
+  // Published newsletters are publicly accessible (no auth required)
+  const isPublicNewsletter = document.isNewsletter && document.published;
 
-  // If not published: only publisher+member or admin can access
-  // If published or archived: any verified user can access
-  if (!document.published && !document.archived && !canManage) {
-    return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+  if (!isPublicNewsletter) {
+    // All other documents require authentication
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        roles: true,
+        committees: { select: { id: true } },
+      },
+    });
+
+    if (!user || user.verificationStatus !== 'verified') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const isAdmin = user.roles.some(r => r.name === 'dbadmin');
+    const isPublisher = user.roles.some(r => r.name === 'publisher');
+    const isMember = user.committees.some(c => c.id === document.committeeId);
+    const canManage = isAdmin || (isPublisher && isMember);
+
+    // If not published: only publisher+member or admin can access
+    // If published or archived: any verified user can access
+    if (!document.published && !document.archived && !canManage) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    }
   }
 
   // Build safe file path - validate that it starts with the documents base
@@ -85,13 +93,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const filename = path.basename(document.filename);
   const encodedFilename = encodeURIComponent(filename);
 
+  const cacheControl = isPublicNewsletter
+    ? 'public, max-age=86400'
+    : 'private, no-store';
+
   return new NextResponse(new Uint8Array(fileBuffer), {
     status: 200,
     headers: {
       'Content-Type': contentType,
       'Content-Disposition': `inline; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`,
       'Content-Length': String(fileBuffer.length),
-      'Cache-Control': 'private, no-store',
+      'Cache-Control': cacheControl,
     },
   });
 }
