@@ -247,14 +247,19 @@ docker compose -f docker-compose.prod.yml up -d --build
 What happens:
 
 1. PostgreSQL starts and becomes healthy
-2. App container runs Prisma migrations (`npx prisma migrate deploy`)
+2. `migrate` container runs Prisma migrations (`prisma migrate deploy`) and exits successfully
 3. Nginx starts and proxies HTTPS traffic to the app
 
 ## 10. Seed Database (First Deployment Only)
 
 ```bash
-docker compose -f docker-compose.prod.yml exec app npx prisma db seed
+docker compose -f docker-compose.prod.yml run --rm --entrypoint "node node_modules/prisma/build/index.js db seed" migrate
 ```
+
+Why this command:
+
+- The `app` runtime image is slim and does not include the Prisma CLI.
+- The `migrate` image is built from the full builder stage and has the Prisma CLI and seed dependencies.
 
 ## 11. Verify Deployment
 
