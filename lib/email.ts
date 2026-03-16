@@ -1,5 +1,9 @@
 import nodemailer from 'nodemailer';
 
+function getEmailPassword(): string | undefined {
+  return process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS;
+}
+
 // Validate email configuration on startup
 function validateEmailConfig() {
   const missingVars: string[] = [];
@@ -25,7 +29,7 @@ function validateEmailConfig() {
   // Otherwise check individual fields
   if (!process.env.EMAIL_HOST) missingVars.push('EMAIL_HOST');
   if (!process.env.EMAIL_USER) missingVars.push('EMAIL_USER');
-  if (!process.env.EMAIL_PASSWORD) missingVars.push('EMAIL_PASSWORD');
+  if (!getEmailPassword()) missingVars.push('EMAIL_PASSWORD (or EMAIL_PASS)');
   if (!process.env.EMAIL_FROM) missingVars.push('EMAIL_FROM');
 
   if (missingVars.length > 0) {
@@ -40,8 +44,6 @@ function validateEmailConfig() {
   return true;
 }
 
-const isConfigValid = validateEmailConfig();
-
 // Create nodemailer transporter based on configuration format
 const emailConfig = process.env.EMAIL_SERVER
   ? process.env.EMAIL_SERVER  // Use connection string directly
@@ -51,7 +53,7 @@ const emailConfig = process.env.EMAIL_SERVER
       secure: process.env.EMAIL_SECURE === 'true',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        pass: getEmailPassword(),
       },
     };
 
@@ -65,8 +67,10 @@ export interface EmailOptions {
 }
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
+  const isConfigValid = validateEmailConfig();
+
   if (!isConfigValid) {
-    const error = new Error('Email configuration is invalid. Please check your environment variables (EMAIL_HOST, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM).');
+    const error = new Error('Email configuration is invalid. Please check your environment variables (EMAIL_HOST, EMAIL_USER, EMAIL_PASSWORD or EMAIL_PASS, EMAIL_FROM).');
     console.error('❌ Email send failed:', error.message);
     throw error;
   }

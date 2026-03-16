@@ -1,8 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import Image from 'next/image';
 
-// Revalidate every 5 minutes so the page reflects newly published newsletters
-export const revalidate = 300;
+// This page reads from Prisma; force runtime rendering so Docker build does not
+// require DATABASE_URL during static prerender.
+export const dynamic = 'force-dynamic';
 
 interface Newsletter {
   id: string;
