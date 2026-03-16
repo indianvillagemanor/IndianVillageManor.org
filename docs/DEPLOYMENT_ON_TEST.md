@@ -92,6 +92,7 @@ Edit `.env` with production-like test values:
 # Domain
 NEXTAUTH_URL="https://server.domain.com"
 NEXT_PUBLIC_APP_URL="https://server.domain.com"
+TLS_DOMAIN="server.domain.com"
 
 # Strong secrets
 NEXTAUTH_SECRET="<openssl-rand-base64-32>"
