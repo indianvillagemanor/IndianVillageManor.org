@@ -249,7 +249,8 @@ What happens:
 
 1. PostgreSQL starts and becomes healthy
 2. `migrate` container runs Prisma migrations (`prisma migrate deploy`) and exits successfully
-3. Nginx starts and proxies HTTPS traffic to the app
+3. The app image is rebuilt, including `poppler-utils` (`pdftoppm`) for newsletter PDF thumbnails
+4. Nginx starts and proxies HTTPS traffic to the app
 
 ## 10. Seed Database (First Deployment Only)
 
@@ -301,6 +302,8 @@ cd /opt/ivm
 git pull origin main
 docker compose -f docker-compose.prod.yml up -d --build
 ```
+
+The `--build` matters here: it rebuilds the `app` image, which is where the PDF thumbnail dependency is installed. Skipping the rebuild can leave the server on an older image without the current thumbnail-generation behavior.
 
 ## 13. TLS Renewal
 

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { ensurePdfThumbnail } from '@/lib/pdf-thumbnail';
 import Image from 'next/image';
 
 // This page reads from Prisma; force runtime rendering so Docker build does not
@@ -9,11 +10,12 @@ interface Newsletter {
   id: string;
   title: string;
   uploadedAt: Date;
+  filename: string;
   thumbnailPath: string | null;
 }
 
 async function getPublishedNewsletters(): Promise<Newsletter[]> {
-  return prisma.document.findMany({
+  const newsletters = await prisma.document.findMany({
     where: {
       isNewsletter: true,
       published: true,
@@ -24,9 +26,28 @@ async function getPublishedNewsletters(): Promise<Newsletter[]> {
       id: true,
       title: true,
       uploadedAt: true,
+      filename: true,
       thumbnailPath: true,
     },
   });
+
+  return Promise.all(
+    newsletters.map(async newsletter => {
+      const thumbnailPath = await ensurePdfThumbnail(newsletter);
+
+      if (thumbnailPath !== newsletter.thumbnailPath) {
+        await prisma.document.update({
+          where: { id: newsletter.id },
+          data: { thumbnailPath },
+        });
+      }
+
+      return {
+        ...newsletter,
+        thumbnailPath,
+      };
+    })
+  );
 }
 
 // ---- Styles ----

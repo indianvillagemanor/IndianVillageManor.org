@@ -5,7 +5,14 @@ import fs from 'fs/promises';
 
 const execFileAsync = promisify(execFile);
 
+const DOCUMENTS_DIR = '/data/documents';
 const THUMBNAILS_DIR = '/data/documents/thumbnails';
+
+interface ThumbnailDocument {
+  id: string;
+  filename: string;
+  thumbnailPath: string | null;
+}
 
 /**
  * Ensures the thumbnails directory exists.
@@ -77,13 +84,40 @@ export async function generatePdfThumbnail(
  */
 export async function deletePdfThumbnail(thumbnailPath: string): Promise<void> {
   try {
-    const absPath = path.join('/data/documents', thumbnailPath);
+    const absPath = path.join(DOCUMENTS_DIR, thumbnailPath);
     // Prevent path traversal: resolved path must be inside /data/documents
     const resolved = path.resolve(absPath);
-    const resolvedBase = path.resolve('/data/documents');
+    const resolvedBase = path.resolve(DOCUMENTS_DIR);
     if (!resolved.startsWith(resolvedBase + path.sep) && resolved !== resolvedBase) return;
     await fs.unlink(resolved);
   } catch {
     // File may not exist — ignore
   }
+}
+
+/**
+ * Verifies an existing thumbnail path or regenerates it from the source PDF.
+ * Returns the usable relative thumbnail path, or null if recovery fails.
+ */
+export async function ensurePdfThumbnail(document: ThumbnailDocument): Promise<string | null> {
+  if (!document.filename.toLowerCase().endsWith('.pdf')) {
+    return null;
+  }
+
+  if (document.thumbnailPath) {
+    try {
+      const absPath = path.join(DOCUMENTS_DIR, document.thumbnailPath);
+      const resolved = path.resolve(absPath);
+      const resolvedBase = path.resolve(DOCUMENTS_DIR);
+      if (resolved.startsWith(resolvedBase + path.sep) || resolved === resolvedBase) {
+        await fs.access(resolved);
+        return document.thumbnailPath;
+      }
+    } catch {
+      // Fall through and regenerate from the source PDF.
+    }
+  }
+
+  const sourcePdfPath = path.join(DOCUMENTS_DIR, document.filename);
+  return generatePdfThumbnail(sourcePdfPath, document.id);
 }

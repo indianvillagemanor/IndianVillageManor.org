@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ensurePdfThumbnail } from '@/lib/pdf-thumbnail';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -16,6 +17,8 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   const document = await prisma.document.findUnique({
     where: { id: documentId },
     select: {
+      id: true,
+      filename: true,
       isNewsletter: true,
       published: true,
       deleted: true,
@@ -27,12 +30,21 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Thumbnail not found' }, { status: 404 });
   }
 
-  if (!document.thumbnailPath) {
+  const thumbnailPath = await ensurePdfThumbnail(document);
+
+  if (thumbnailPath !== document.thumbnailPath) {
+    await prisma.document.update({
+      where: { id: documentId },
+      data: { thumbnailPath },
+    });
+  }
+
+  if (!thumbnailPath) {
     return NextResponse.json({ error: 'No thumbnail available' }, { status: 404 });
   }
 
   // Build safe file path - validate that it starts with the documents base
-  const filePath = path.join(DOCUMENTS_BASE, document.thumbnailPath);
+  const filePath = path.join(DOCUMENTS_BASE, thumbnailPath);
   const resolvedPath = path.resolve(filePath);
   const resolvedBase = path.resolve(DOCUMENTS_BASE);
 
