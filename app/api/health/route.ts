@@ -28,9 +28,10 @@ export async function GET() {
   checks.uptime = Math.round(os.uptime());
   checks.loadAvg = os.loadavg()[0]?.toFixed(2);
 
-  const statusCode = checks.status === 'ok' ? 200 : 503;
+  // Always return 200 so container health checks pass even when DB is temporarily unavailable.
+  // Callers should inspect the JSON body for the actual status field.
   return NextResponse.json(checks, {
-    status: statusCode,
+    status: 200,
     headers: { 'Cache-Control': 'no-cache, no-store' },
   });
 }
