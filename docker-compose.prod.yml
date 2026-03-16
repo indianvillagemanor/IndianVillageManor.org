@@ -1,4 +1,19 @@
 services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    container_name: ivm-migrate
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-ivm_user}:${POSTGRES_PASSWORD:-ivm_password}@postgres:5432/${POSTGRES_DB:-ivm_db}"
+    networks:
+      - ivm-network
+
   postgres:
     image: postgres:16-alpine
     container_name: ivm-postgres
@@ -26,6 +41,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-ivm_user}:${POSTGRES_PASSWORD:-ivm_password}@postgres:5432/${POSTGRES_DB:-ivm_db}"
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost}

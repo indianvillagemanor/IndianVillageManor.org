@@ -64,3 +64,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]
+
+# Stage 4: Migration runner — uses builder which has full node_modules
+FROM builder AS migrate
+ENV NODE_ENV=production
+ENTRYPOINT ["node", "node_modules/prisma/build/index.js", "migrate", "deploy"]
