@@ -76,7 +76,7 @@ Visit [http://localhost:3000](http://localhost:3000).
 ```
 ├── app/                    # Next.js App Router pages
 │   ├── admin/             # Admin pages (verify, console, committees)
-│   ├── api/               # API routes (26 endpoints)
+│   ├── api/               # API routes (27 endpoints)
 │   ├── auth/              # Auth pages (login, error, verify-request)
 │   ├── committees/        # Committee pages
 │   ├── dashboard/         # User dashboard
@@ -88,6 +88,8 @@ Visit [http://localhost:3000](http://localhost:3000).
 │   ├── auth.ts           # NextAuth configuration
 │   ├── audit.ts          # Audit logging with bot detection
 │   ├── email.ts          # Nodemailer setup
+│   ├── magic-link.ts     # Magic link generation and validation
+│   ├── monitoring.ts     # Application monitoring utilities
 │   ├── notifications.ts  # Verifier and admin notifications
 │   ├── prisma.ts         # Prisma client singleton
 │   ├── sanitize.ts       # Input sanitization (XSS, SQL injection detection)
@@ -95,7 +97,7 @@ Visit [http://localhost:3000](http://localhost:3000).
 ├── prisma/                # Database schema, migrations, seed
 ├── __tests__/             # Unit tests (Jest)
 ├── e2e/                   # E2E tests (Playwright)
-├── scripts/               # Utility and backup scripts
+├── scripts/               # Utility scripts (dev server, backups)
 ├── nginx/                 # Nginx reverse proxy config (production)
 ├── docs/                  # Planning and documentation
 ├── Dockerfile             # Multi-stage production build
@@ -134,7 +136,9 @@ npx prisma db seed                         # Seed data (idempotent)
 | `NEXTAUTH_SECRET` | Yes | Secret key for NextAuth JWT |
 | `EMAIL_SERVER` | Yes | SMTP connection string |
 | `EMAIL_FROM` | Yes | Sender email address |
+| `NEXT_PUBLIC_APP_URL` | Yes | Public application URL |
 | `SESSION_SECRET` | Yes | Session encryption secret |
+| `MAGIC_LINK_EXPIRY_MINUTES` | No | Magic link expiry time (default: 15) |
 | `GOOGLE_CLIENT_ID` | No | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
 | `AZURE_AD_CLIENT_ID` | No | Azure AD OAuth client ID |
