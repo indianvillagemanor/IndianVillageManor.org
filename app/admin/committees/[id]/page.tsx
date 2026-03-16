@@ -263,7 +263,7 @@ export default function AdminCommitteePage() {
       const res = await fetch(`/api/admin/committees/${committeeId}`);
       if (res.status === 401) { router.push('/auth/login'); return; }
       if (res.status === 403) { router.push('/'); return; }
-      if (res.status === 404) { router.push('/committees'); return; }
+      if (res.status === 404) { router.push('/admin/committees'); return; }
       const data = await res.json();
       setCommittee(data.committee);
       setName(data.committee.name);
@@ -363,7 +363,7 @@ export default function AdminCommitteePage() {
         setError(data.error || 'Failed to delete committee');
         return;
       }
-      router.push('/committees');
+      router.push('/admin/committees');
     } catch {
       setError('Failed to delete committee. Please try again.');
     } finally {
@@ -438,8 +438,8 @@ export default function AdminCommitteePage() {
 
   return (
     <div style={pageStyle}>
-      <Link href="/committees" style={backLinkStyle}>
-        &larr; Back to Committees
+      <Link href="/admin/committees" style={backLinkStyle}>
+        &larr; Back to Committee Management
       </Link>
 
       <h1 style={headingStyle}>
@@ -509,7 +509,7 @@ export default function AdminCommitteePage() {
           >
             {saving ? 'Saving...' : isNew ? 'Create Committee' : 'Save Changes'}
           </button>
-          <Link href="/committees" style={cancelLinkStyle}>
+          <Link href="/admin/committees" style={cancelLinkStyle}>
             Cancel
           </Link>
           {!isNew && (
