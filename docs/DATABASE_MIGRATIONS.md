@@ -641,8 +641,8 @@ cat prisma/migrations/*/migration.sql
 ## Questions or Issues
 
 For questions about database migrations, see:
-- DATABASE.md for schema documentation
-- DESIGN.md for business requirements
-- OPERATIONS.md for operational procedures
+- [DATABASE.md](./DATABASE.md) for schema documentation
+- [DESIGN.md](./DESIGN.md) for business requirements
+- [OPERATIONS.md](./OPERATIONS.md) for operational procedures
 
 For help with stuck migrations or emergencies, contact the development team lead.

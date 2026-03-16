@@ -377,9 +377,9 @@ Log in as the bootstrap user (dbadmin) via magic link at http://localhost:3000/a
 
 ---
 
-### Test 26: DEPLOYMENT.md
+### Test 26: [DEPLOYMENT.md](../DEPLOYMENT.md)
 
-1. Open `DEPLOYMENT.md` and verify it covers:
+1. Open [DEPLOYMENT.md](../DEPLOYMENT.md) and verify it covers:
    - Architecture diagram (Client → Nginx → App → PostgreSQL)
    - Server prerequisites
    - Initial deployment steps
@@ -388,13 +388,13 @@ Log in as the bootstrap user (dbadmin) via magic link at http://localhost:3000/a
    - Container management commands
    - Troubleshooting section
 
-**Expected**: DEPLOYMENT.md provides complete deployment guide.
+**Expected**: [DEPLOYMENT.md](../DEPLOYMENT.md) provides complete deployment guide.
 
 ---
 
-### Test 27: OPERATIONS.md
+### Test 27: [OPERATIONS.md](../OPERATIONS.md)
 
-1. Open `OPERATIONS.md` and verify it covers:
+1. Open [OPERATIONS.md](../OPERATIONS.md) and verify it covers:
    - Data locations table
    - Backup and recovery procedures
    - User administration via admin console
@@ -405,20 +405,20 @@ Log in as the bootstrap user (dbadmin) via magic link at http://localhost:3000/a
    - Security operations
    - Maintenance procedures
 
-**Expected**: OPERATIONS.md provides complete operations guide.
+**Expected**: [OPERATIONS.md](../OPERATIONS.md) provides complete operations guide.
 
 ---
 
-### Test 28: API.md
+### Test 28: [API.md](../API.md)
 
-1. Open `API.md` and verify it documents:
+1. Open [API.md](../API.md) and verify it documents:
    - All 26+ API endpoints
    - Request/response formats with examples
    - Authentication requirements per endpoint
    - Error response format
    - HTTP status code reference
 
-**Expected**: API.md is a complete REST API reference.
+**Expected**: [API.md](../API.md) is a complete REST API reference.
 
 ---
 

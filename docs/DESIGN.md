@@ -47,7 +47,7 @@ Primary Business Rules
 
 Data Model (recommended / Prisma style)
 --------------------------------------
-See DATABASE.md for detailed schema documentation.
+See [DATABASE.md](./DATABASE.md) for detailed schema documentation.
 
 model User {
   id            String   @id @default(uuid())
@@ -220,7 +220,7 @@ Backup and Deployment
   - Recommend daily incremental and weekly full backups
   - Keep 30-day rotation
   - Encrypt backups
-- Database migrations: See DATABASE_MIGRATIONS.md for deployment strategy.
+- Database migrations: See [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md) for deployment strategy.
 - Environment vars: DATABASE_URL, NEXTAUTH_URL, NEXTAUTH_SECRET, SMTP_URL, STORAGE_PATH, BACKUP_CRON, etc.
 
 Monitoring and Alerting
@@ -317,8 +317,8 @@ Open Questions / Configurable Items
 
 Implementation Notes / Next Tasks
 ---------------------------------
-1. Create DATABASE.md with complete schema documentation.
-2. Create DATABASE_MIGRATIONS.md with migration deployment strategy.
+1. Create [DATABASE.md](./DATABASE.md) with complete schema documentation.
+2. Create [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md) with migration deployment strategy.
 3. Create Prisma schema models (User, Role, Committee, Document, Event, AuditLog, SystemConfig, EmailTemplate) and run migrations.
 4. Implement NextAuth with SSO + magic-link, rate limiting, and validation on registration.
 5. Implement basic audit logging early (write to /data/logs volume).

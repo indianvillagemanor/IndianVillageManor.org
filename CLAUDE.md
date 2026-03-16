@@ -15,8 +15,8 @@ This document helps AI agents quickly understand and navigate the Indian Village
 
 ### Essential Files
 - `README.md` - Setup instructions and basic project info
-- `DESIGN.md` - Complete design specification
-- `DATABASE.md` - Comprehensive database schema documentation
+- `docs/DESIGN.md` - Complete design specification
+- `docs/DATABASE.md` - Comprehensive database schema documentation
 - `docs/planning/PROGRESS.md` - Current milestone status and next steps
 - `docs/planning/00-overview.md` - All milestone descriptions
 - `prisma/schema.prisma` - Database schema (User, Role, Committee, Document, Event, AuditLog, SystemConfig, EmailTemplate)
@@ -181,7 +181,7 @@ The UI design is based on an existing Angular project:
 ### Reading Project Status
 1. Check `docs/planning/PROGRESS.md` for overall project completion and milestone notes
 2. Read the specific milestone doc in `docs/planning/M##-*.md` for detailed scope and caveats
-3. Review DATABASE.md if database changes are needed
+3. Review `docs/DATABASE.md` if database changes are needed
 
 ### Starting Follow-up Work
 1. Identify the target area (feature refinement, bug fix, docs, or operations)
@@ -193,7 +193,7 @@ The UI design is based on an existing Angular project:
 ### Database Changes
 1. Modify `prisma/schema.prisma`
 2. Run `npx prisma migrate dev --name descriptive_name`
-3. Update `DATABASE.md` if schema significantly changes
+3. Update `docs/DATABASE.md` if schema significantly changes
 4. Update seed script if needed for new data
 5. Test migration with fresh database
 

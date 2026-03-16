@@ -23,7 +23,7 @@ This critical path delivers the three requested initial milestones plus profile 
 - M12: Added bulk operations, SystemConfig UI, EmailTemplate UI
 - M13: Enhanced audit logging with volume storage, robot detection, retention
 - M15: Added /data/logs volume
-- M16: Added DATABASE_MIGRATIONS.md, migration rollback tests
+- M16: Added [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md), migration rollback tests
 - M18: Clarified E2E tests written with features
 - M20: Added comprehensive monitoring and alerting
 

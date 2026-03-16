@@ -143,20 +143,20 @@ npx prisma db seed                         # Seed data (idempotent)
 
 ## Production Deployment
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for Docker-based production deployment instructions.
+See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for Docker-based production deployment instructions.
 
 ## Operations
 
-See [OPERATIONS.md](./OPERATIONS.md) for backup, recovery, monitoring, and administrative procedures.
+See [OPERATIONS.md](./docs/OPERATIONS.md) for backup, recovery, monitoring, and administrative procedures.
 
 ## Documentation
 
-- [Deployment Guide](./DEPLOYMENT.md) - Production deployment
-- [Operations Guide](./OPERATIONS.md) - Day-to-day operations
-- [API Reference](./API.md) - REST API endpoints
-- [Database Schema](./DATABASE.md) - Complete schema documentation
-- [Database Migrations](./DATABASE_MIGRATIONS.md) - Migration procedures
-- [Design Document](./DESIGN.md) - Architecture and design specification
+- [Deployment Guide](./docs/DEPLOYMENT.md) - Production deployment
+- [Operations Guide](./docs/OPERATIONS.md) - Day-to-day operations
+- [API Reference](./docs/API.md) - REST API endpoints
+- [Database Schema](./docs/DATABASE.md) - Complete schema documentation
+- [Database Migrations](./docs/DATABASE_MIGRATIONS.md) - Migration procedures
+- [Design Document](./docs/DESIGN.md) - Architecture and design specification
 - [Development Progress](./docs/planning/PROGRESS.md) - Milestone tracking
 
 ## Tech Stack

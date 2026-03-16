@@ -3,7 +3,7 @@
 **Goal**: Automated backup of database, documents, and logs with recovery procedures.
 
 **Features**:
-- **DATABASE_MIGRATIONS.md**: Documentation for production migration strategy (created in this milestone)
+- **[DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md)**: Documentation for production migration strategy (created in this milestone)
 - Backup script for:
   - PostgreSQL dump
   - Document volume snapshot (/data/documents)
@@ -17,7 +17,7 @@
 - **Database migration rollback tests**
 
 **Manual Tests**:
-1. **Review DATABASE_MIGRATIONS.md** - verify migration strategy documented
+1. **Review [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md)** - verify migration strategy documented
 2. Run backup script manually
 3. Verify backup files created in expected location:
    - PostgreSQL dump
@@ -35,7 +35,7 @@
 7. Verify old backups are cleaned up per retention policy
 8. **Test database migration rollback**:
    - Apply a test migration
-   - Verify rollback procedure works (see DATABASE_MIGRATIONS.md)
+   - Verify rollback procedure works (see [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md))
 9. Verify backups are encrypted
 
 **Automated Tests**:

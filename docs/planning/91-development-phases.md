@@ -32,8 +32,8 @@ Deliverable:
 - SSO authentication (Google, Microsoft)
 - Containerized deployment with persistent volumes
 - Automated encrypted backups with recovery procedures
-- DATABASE_MIGRATIONS.md for production deployments
+- [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md) for production deployments
 - Security hardening
 - Testing infrastructure and CI/CD
-- Complete documentation (DATABASE.md already done)
+- Complete documentation ([DATABASE.md](../DATABASE.md) already done)
 - Performance optimization and monitoring/alerting system

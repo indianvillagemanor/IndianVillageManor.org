@@ -54,9 +54,9 @@ Each milestone document includes:
 
 ## Related Documentation
 
-- **DESIGN.md**: Complete design specification
-- **DATABASE.md**: Database schema documentation
-- **DATABASE_MIGRATIONS.md**: Migration deployment strategy
+- **[DESIGN.md](../DESIGN.md)**: Complete design specification
+- **[DATABASE.md](../DATABASE.md)**: Database schema documentation
+- **[DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md)**: Migration deployment strategy
 
 ---
 

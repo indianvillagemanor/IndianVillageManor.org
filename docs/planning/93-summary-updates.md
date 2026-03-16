@@ -20,9 +20,9 @@ All user feedback incorporated:
 16. ✅ Calendar link added in M11 (not M4)
 17. ✅ Past events defined as "before current calendar month"
 18. ✅ Failed email notifications to dbadmin
-19. ✅ DATABASE.md created with complete schema documentation
-20. ✅ DATABASE_MIGRATIONS.md created with deployment strategy
+19. ✅ [DATABASE.md](../DATABASE.md) created with complete schema documentation
+20. ✅ [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md) created with deployment strategy
 21. ✅ Migration rollback tests added to M16
 22. ✅ E2E tests written alongside features (M3-M13)
 23. ✅ Monitoring and alerting system in M20 with email notifications to dbadmin
-24. ✅ All documents reference DATABASE.md and DATABASE_MIGRATIONS.md
+24. ✅ All documents reference [DATABASE.md](../DATABASE.md) and [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md)

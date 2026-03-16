@@ -24,7 +24,7 @@ Each milestone includes specific manual test steps. For acceptance testing:
 - [ ] All automated tests passing (unit, integration, E2E)
 - [ ] Security audit completed (M17)
 - [ ] Performance benchmarks met (M20)
-- [ ] Documentation complete (M19, including DATABASE.md and DATABASE_MIGRATIONS.md)
+- [ ] Documentation complete (M19, including [DATABASE.md](../DATABASE.md) and [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md))
 - [ ] Backup/recovery procedures tested (M16)
 - [ ] Migration rollback tested (M16)
 - [ ] Monitoring and alerting operational (M20)

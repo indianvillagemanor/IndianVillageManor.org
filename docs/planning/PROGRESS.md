@@ -645,7 +645,7 @@ This document tracks the completion status of all milestones in the Indian Villa
 - [x] Optional AES-256-CBC encryption via BACKUP_ENCRYPTION_KEY
 - [x] Configurable backup retention with automatic cleanup (default 30 days)
 - [x] Crontab example for scheduled daily backups at 2:00 AM
-- [x] DATABASE_MIGRATIONS.md already comprehensive (created earlier)
+- [x] [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md) already comprehensive (created earlier)
 - [x] PostgreSQL custom-format dump for efficient restore
 - [x] Combined archive creation (database + documents + logs)
 
@@ -660,7 +660,7 @@ This document tracks the completion status of all milestones in the Indian Villa
 - Documents and logs compressed separately before combining
 - Restore script prompts before overwriting database
 - Old backups older than retention period auto-deleted
-- DATABASE_MIGRATIONS.md already covers migration rollback testing
+- [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md) already covers migration rollback testing
 
 ---
 
@@ -739,25 +739,25 @@ This document tracks the completion status of all milestones in the Indian Villa
 
 **Key Deliverables**:
 - [x] README.md rewritten with comprehensive project overview, setup instructions, project structure, scripts, environment variables
-- [x] DEPLOYMENT.md - Docker-based production deployment guide (architecture, SSL, updating, rollback, troubleshooting)
-- [x] OPERATIONS.md - Day-to-day operations (backup/recovery, user admin, system config, audit logs, monitoring, maintenance)
-- [x] API.md - Complete REST API reference (26 endpoints, request/response formats, auth requirements)
-- [x] DATABASE.md (already complete from earlier milestones)
-- [x] DATABASE_MIGRATIONS.md (already complete from earlier milestones)
+- [x] [DEPLOYMENT.md](../DEPLOYMENT.md) - Docker-based production deployment guide (architecture, SSL, updating, rollback, troubleshooting)
+- [x] [OPERATIONS.md](../OPERATIONS.md) - Day-to-day operations (backup/recovery, user admin, system config, audit logs, monitoring, maintenance)
+- [x] [API.md](../API.md) - Complete REST API reference (26 endpoints, request/response formats, auth requirements)
+- [x] [DATABASE.md](../DATABASE.md) (already complete from earlier milestones)
+- [x] [DATABASE_MIGRATIONS.md](../DATABASE_MIGRATIONS.md) (already complete from earlier milestones)
 
 **New Files Created**:
-- `DEPLOYMENT.md` - Production deployment guide
-- `OPERATIONS.md` - Operations and maintenance guide
-- `API.md` - REST API reference documentation
+- `docs/DEPLOYMENT.md` - Production deployment guide
+- `docs/OPERATIONS.md` - Operations and maintenance guide
+- `docs/API.md` - REST API reference documentation
 
 **Files Modified**:
 - `README.md` - Complete rewrite with features, setup, structure, scripts, env vars, and documentation links
 
 **Technical Notes**:
 - All documentation references actual project configuration (docker-compose.prod.yml, nginx config, backup scripts)
-- API.md covers all 26 API route files with request/response examples
-- OPERATIONS.md includes SQL queries for common admin tasks
-- DEPLOYMENT.md covers SSL setup, container management, rollback procedures
+- [API.md](../API.md) covers all 26 API route files with request/response examples
+- [OPERATIONS.md](../OPERATIONS.md) includes SQL queries for common admin tasks
+- [DEPLOYMENT.md](../DEPLOYMENT.md) covers SSL setup, container management, rollback procedures
 
 ---
 

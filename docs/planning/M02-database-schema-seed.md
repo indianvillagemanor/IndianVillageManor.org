@@ -107,7 +107,7 @@ Implemented idempotent seed script (`prisma/seed.ts`) that creates:
 - Removed `isResident` and `isOwner` fields from User model
 - Added "resident" role to standard roles list
 - Created migration `20260217190845_remove_is_resident_is_owner_fields`
-- Updated DATABASE.md to reflect role-based approach
+- Updated [DATABASE.md](../DATABASE.md) to reflect role-based approach
 - During registration, users will select owner/resident status, which assigns corresponding roles
 
 ### Dev Server Hang
@@ -150,7 +150,7 @@ Implemented idempotent seed script (`prisma/seed.ts`) that creates:
 - `prisma/schema.prisma` - Removed isResident/isOwner fields
 - `prisma/seed.ts` - Complete seed implementation
 - `prisma/migrations/20260217190845_remove_is_resident_is_owner_fields/` - New migration
-- `DATABASE.md` - Updated documentation for role-based approach
+- `docs/DATABASE.md` - Updated documentation for role-based approach
 - `docs/planning/M02-database-schema-seed.md` - Marked as completed
 - `.vscode/settings.json` - Added npm/git command permissions
 

@@ -435,7 +435,7 @@ CREATE INDEX idx_audit_created_at ON "AuditLog"("createdAt");
 
 ## Migrations
 
-All database migrations are managed through Prisma Migrate. See `DATABASE_MIGRATIONS.md` for deployment strategy.
+All database migrations are managed through Prisma Migrate. See [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md) for deployment strategy.
 
 ### Initial Migration
 
@@ -450,7 +450,7 @@ When modifying the schema:
 2. Run `npx prisma migrate dev --name <descriptive-name>`
 3. Test rollback capability
 4. Review generated SQL
-5. Deploy to production using blue-green strategy (see DATABASE_MIGRATIONS.md)
+5. Deploy to production using blue-green strategy (see [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md))
 
 ---
 
@@ -488,7 +488,7 @@ rsync -av /backup/documents/ /data/documents/
 rsync -av /backup/logs/ /data/logs/
 ```
 
-See `OPERATIONS.md` for detailed backup/recovery procedures.
+See [OPERATIONS.md](./OPERATIONS.md) for detailed backup/recovery procedures.
 
 ---
 
@@ -535,6 +535,6 @@ Potential schema additions for future versions:
 ## Questions or Issues
 
 For questions about the database schema, see:
-- DESIGN.md for business rules
-- DATABASE_MIGRATIONS.md for migration strategy
-- OPERATIONS.md for operational procedures
+- [DESIGN.md](./DESIGN.md) for business rules
+- [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md) for migration strategy
+- [OPERATIONS.md](./OPERATIONS.md) for operational procedures
