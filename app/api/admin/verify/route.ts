@@ -7,7 +7,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { createMagicLink } from '@/lib/magic-link';
 
 // GET: List pending users for verifier dashboard
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {

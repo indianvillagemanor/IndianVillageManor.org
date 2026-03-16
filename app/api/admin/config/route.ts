@@ -14,7 +14,7 @@ const NUMERIC_KEYS = [
 ];
 
 // GET /api/admin/config - List all SystemConfig entries
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {

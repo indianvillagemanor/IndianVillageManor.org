@@ -230,7 +230,6 @@ export default function CommitteeDetailPage() {
     );
   }
 
-  const canManage = viewerInfo.isAdmin || viewerInfo.isPublisher || viewerInfo.isMember;
   const canSeeMembers = viewerInfo.isAdmin || viewerInfo.isMember;
   const canManageDocs =
     viewerInfo.isAdmin ||

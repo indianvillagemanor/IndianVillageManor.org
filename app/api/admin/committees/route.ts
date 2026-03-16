@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { logAuditEvent } from '@/lib/audit';
 
 // GET /api/admin/committees - List all committees with member and document counts
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {

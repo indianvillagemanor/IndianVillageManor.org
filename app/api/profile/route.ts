@@ -10,7 +10,7 @@ import { sendVerifierNotification } from '@/lib/notifications';
 // firstName, lastName, unitNumber, phone, and role changes all trigger re-verification
 
 // GET: Fetch current user's profile
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {

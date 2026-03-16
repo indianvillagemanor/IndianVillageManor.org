@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { logAuditEvent } from '@/lib/audit';
 
 // GET: List events with past event filtering based on verification status
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   // Calculate the start of the current calendar month
