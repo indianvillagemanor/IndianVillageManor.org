@@ -40,7 +40,7 @@ This document tracks the completion status of all milestones in the Indian Villa
 - [x] Exact styling match (IVM green theme, Noto Serif font, responsive behavior)
 - [x] Stub authentication (login menu item disabled)
 
-**Reference**: `/home/levis/Development/IVM/IndianVillageManor/ivm_app`
+**Reference**: `./IndianVillageManor/ivm_app`
 
 **Issues Resolved**:
 - next-auth peer dependency conflict (resolved with --legacy-peer-deps)

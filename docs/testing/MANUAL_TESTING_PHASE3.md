@@ -23,7 +23,7 @@ Before running these tests, ensure:
 
 3. Dev server is running:
    ```bash
-   /home/levis/Development/IVM/scripts/kill3000_and_start_dev.sh
+   ./scripts/kill3000_and_start_dev.sh
    ```
 
 4. Bootstrap user exists: `indianvillagemanor+bootstrap@gmail.com` (dbadmin role)

@@ -31,7 +31,7 @@ This document helps AI agents quickly understand and navigate the Indian Village
 
 ### Project Structure
 ```
-/home/levis/Development/IVM/
+./
 ├── app/                    # Next.js App Router pages
 │   ├── globals.css        # TailwindCSS styles (IVM green theme)
 │   ├── layout.tsx         # Root layout with WindowContext
@@ -85,7 +85,7 @@ npm install                    # Install dependencies
 npx prisma migrate dev         # Run migrations
 npx prisma db seed             # Seed database (idempotent)
 npx prisma generate            # Generate Prisma client
-/home/levis/Development/IVM/scripts/kill3000_and_start_dev.sh  # Start/restart dev server (localhost:3000)
+./scripts/kill3000_and_start_dev.sh  # Start/restart dev server (localhost:3000)
 ```
 
 ### Database Management
@@ -172,7 +172,7 @@ Audit logging, SSO, containerization, security, testing, monitoring ✅
 ## Reference Project
 
 The UI design is based on an existing Angular project:
-- **Location**: `/home/levis/Development/IVM/IndianVillageManor/ivm_app` (symlinked as `./IndianVillageManor`)
+- **Location**: `./IndianVillageManor/ivm_app` (symlinked as `./IndianVillageManor`)
 - **Goal**: Match look, feel, and responsive behavior exactly
 - **Current Status**: M01 completed with exact visual match
 

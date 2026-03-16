@@ -1,10 +1,10 @@
 # M01: Anonymous User Experience
 
 ## Overview
-Create a single long scrollable home page that matches the reference project (`/home/levis/Development/IVM/IndianVillageManor/ivm_app`) exactly in look, feel, and responsive behavior. This includes duplicating the grid-based layout system, all visual sections, images, and the hamburger menu navigation.
+Create a single long scrollable home page that matches the reference project (`./IndianVillageManor/ivm_app`) exactly in look, feel, and responsive behavior. This includes duplicating the grid-based layout system, all visual sections, images, and the hamburger menu navigation.
 
 ## Reference Project
-- Location: `/home/levis/Development/IVM/IndianVillageManor/ivm_app`
+- Location: `./IndianVillageManor/ivm_app`
 - Main page: `app/page.tsx`
 - Layout: `app/layout.tsx`
 
@@ -166,7 +166,7 @@ The home page (`app/page.tsx`) consists of 6 main sections:
 - [ ] WindowWithSize wrapping page content
 
 ### Image Assets to Copy
-Copy the following from `/home/levis/Development/IVM/IndianVillageManor/ivm_app/public/` to `/home/levis/Development/IVM/public/`:
+Copy the following from `./IndianVillageManor/ivm_app/public/` to `./public/`:
 
 **Logo files:**
 - [ ] `IVM Logo Design_Black_24 0225_t.png`

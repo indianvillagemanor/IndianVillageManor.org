@@ -5,7 +5,7 @@
 
 set -e
 
-PROJECT_DIR="/home/levis/Development/IVM"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="$PROJECT_DIR/logs"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 STDOUT_LOG="$LOG_DIR/dev_stdout_$TIMESTAMP.log"

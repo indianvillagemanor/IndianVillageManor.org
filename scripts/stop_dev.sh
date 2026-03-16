@@ -3,7 +3,7 @@
 # Script to stop the dev server
 # Usage: ./scripts/stop_dev.sh
 
-PROJECT_DIR="/home/levis/Development/IVM"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="$PROJECT_DIR/logs"
 PID_FILE="$LOG_DIR/dev.pid"
 
