@@ -1,322 +1,282 @@
-# Deployment Guide
+# Deployment Guide (Parameterized by Hostname)
 
-This guide covers deploying Indian Village Manor to production using Docker.
+This is the canonical deployment and redeployment guide for IVM. It supports both
+primary production and test/staging servers by parameterizing hostname and paths.
+
+## Parameters
+
+Set these once on your target server shell and reuse them in commands below.
+
+```bash
+export HOSTNAME="indianvillagemanor.org"   # Example: sb.stevenlevis.com
+export ADMIN_EMAIL="admin@example.com"
+export APP_DIR="/opt/ivm"
+export COMPOSE_FILE="docker-compose.prod.yml"
+export REPO_URL="<repository-url>"
+```
+
+## Quick Start Paths
+
+- First deployment: follow sections 1 through 6, then section 8 (TLS renewal setup).
+- Redeployment after source changes: go directly to section 7, then run section 6 verification.
 
 ## Architecture
 
-The production stack runs three containers:
+The stack runs three containers:
 
+```text
+Client -> Nginx (80/443) -> Next.js app (3000) -> PostgreSQL (5432)
 ```
-Client → Nginx (port 80/443) → Next.js App (port 3000) → PostgreSQL (port 5432)
-```
 
-- **Nginx** - Reverse proxy, SSL termination, security headers, static file serving
-- **App** - Next.js standalone server with Prisma ORM
-- **PostgreSQL** - Database (PostgreSQL 16 Alpine)
+- Nginx: reverse proxy, SSL termination, security headers
+- App: Next.js standalone server + Prisma ORM
+- PostgreSQL: persistent database
 
-## Prerequisites
+## 1. Preconditions
 
 - Linux server (Ubuntu 22.04+ recommended)
-- Docker Engine 24+
-- Docker Compose v2
-- Domain name with DNS pointing to server (for SSL)
+- Docker Engine 24+ and Docker Compose v2
+- DNS A/AAAA record for `$HOSTNAME` pointing to this server
 - SMTP credentials for email delivery
 
-## Initial Deployment
-
-### 1. Prepare the Server
+Verify DNS before certificate issuance:
 
 ```bash
-# Install Docker
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-
-# Create application directory
-sudo mkdir -p /opt/ivm
-sudo chown $USER:$USER /opt/ivm
-
-# Create data directories
-sudo mkdir -p /data/documents /data/logs /data/backups
-sudo chown -R 1001:1001 /data/documents /data/logs
+dig +short "$HOSTNAME"
 ```
 
-### 2. Clone the Repository
+## 2. Server Setup (First Deployment Only)
+
+If Docker is already installed and working, skip this section.
 
 ```bash
-cd /opt/ivm
-git clone <repository-url> .
+sudo apt update
+sudo apt install -y ca-certificates curl gnupg lsb-release git ufw
+
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+  sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker "$USER"
+
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw --force enable
+
+sudo mkdir -p "$APP_DIR"
+sudo chown -R "$USER":"$USER" "$APP_DIR"
 ```
 
-### 3. Configure Environment
+## 3. Clone and Configure
 
 ```bash
+cd "$APP_DIR"
+git clone "$REPO_URL" .
 cp .env.example .env
 ```
 
-Edit `.env` with production values:
+Update `.env` with your host-specific values:
 
 ```env
-# Database - match docker-compose.prod.yml credentials
-DATABASE_URL="postgresql://ivm_user:STRONG_PASSWORD_HERE@postgres:5432/ivm_db"
+NEXTAUTH_URL="https://${HOSTNAME}"
+NEXT_PUBLIC_APP_URL="https://${HOSTNAME}"
+NEXTAUTH_SECRET="<openssl-rand-base64-32>"
+SESSION_SECRET="<openssl-rand-base64-32>"
 
-# Application URL
-NEXTAUTH_URL="https://indianvillagemanor.org"
-NEXT_PUBLIC_APP_URL="https://indianvillagemanor.org"
+POSTGRES_USER="ivm_user"
+POSTGRES_PASSWORD="<strong-db-password>"
+POSTGRES_DB="ivm_db"
 
-# Generate secure secrets
-NEXTAUTH_SECRET="$(openssl rand -base64 32)"
-SESSION_SECRET="$(openssl rand -base64 32)"
+EMAIL_SERVER="smtps://username:password@smtp.example.com:465"
+EMAIL_FROM="Indian Village Manor <noreply@${HOSTNAME}>"
 
-# Email - SMTP connection string
-EMAIL_SERVER="smtps://user:password@smtp.gmail.com:465"
-EMAIL_FROM="Indian Village Manor <noreply@indianvillagemanor.org>"
-
-# SSO (optional)
-# GOOGLE_CLIENT_ID="..."
-# GOOGLE_CLIENT_SECRET="..."
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+AZURE_AD_CLIENT_ID=""
+AZURE_AD_CLIENT_SECRET=""
+AZURE_AD_TENANT_ID="common"
 ```
 
-Update database credentials in `docker-compose.prod.yml` to match `DATABASE_URL`:
-
-```yaml
-environment:
-  POSTGRES_USER: ivm_user
-  POSTGRES_PASSWORD: STRONG_PASSWORD_HERE
-  POSTGRES_DB: ivm_db
-```
-
-### 4. Build and Start
+Generate secrets quickly:
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build postgres app
+openssl rand -base64 32
 ```
 
-This will:
-1. Build the Next.js app (multi-stage Docker build)
-2. Start PostgreSQL
-3. Run Prisma migrations automatically (via the `migrate` service)
-4. Start the Next.js server
-5. Keep Nginx stopped until SSL certificates are created
+## 4. TLS Certificate and Nginx Hostname Setup (First Deployment Only)
 
-### 5. Seed the Database
-
-On first deployment only:
+Install certbot, issue certificate, then verify files exist:
 
 ```bash
-docker compose -f docker-compose.prod.yml run --rm --entrypoint "" migrate npx prisma db seed
+sudo apt install -y certbot
+sudo certbot certonly --standalone -d "$HOSTNAME" --agree-tos -m "$ADMIN_EMAIL" --non-interactive
+sudo ls -l "/etc/letsencrypt/live/$HOSTNAME/"
 ```
 
-### 6. Verify Deployment
+Update `nginx/default.conf` to use your hostname in all of these lines:
+
+- `server_name $HOSTNAME;`
+- `ssl_certificate /etc/letsencrypt/live/$HOSTNAME/fullchain.pem;`
+- `ssl_certificate_key /etc/letsencrypt/live/$HOSTNAME/privkey.pem;`
+
+Validate these lines quickly:
 
 ```bash
-# Check container health
-docker compose -f docker-compose.prod.yml ps
-
-# Check app health directly (bypasses nginx)
-docker compose -f docker-compose.prod.yml exec app wget -qO- http://127.0.0.1:3000/api/health
-
-# Check logs
-docker compose -f docker-compose.prod.yml logs app
+grep -nE 'server_name|ssl_certificate|ssl_certificate_key' "$APP_DIR/nginx/default.conf"
 ```
 
-## SSL/TLS Configuration
+Verify compose mounts certs into nginx (already configured by default):
 
-### Certbot (Let's Encrypt)
+- `./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro`
+- `/etc/letsencrypt:/etc/letsencrypt:ro`
+
+## 5. Build and Start (First Deployment)
+
+Start app stack in a first-boot-safe order:
 
 ```bash
-# Install certbot
-sudo apt install certbot
+cd "$APP_DIR"
 
-# Get certificate
-sudo certbot certonly --standalone -d indianvillagemanor.org
+# Start postgres + app first (migrations run via migrate service)
+docker compose -f "$COMPOSE_FILE" up -d --build postgres app
+
+# Seed once on first deployment only
+docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "" migrate npx prisma db seed
+
+# Start nginx only after cert files exist
+docker compose -f "$COMPOSE_FILE" up -d nginx
 ```
 
-`nginx/default.conf` is already preconfigured with:
-
-- `ssl_certificate /etc/letsencrypt/live/indianvillagemanor.org/fullchain.pem;`
-- `ssl_certificate_key /etc/letsencrypt/live/indianvillagemanor.org/privkey.pem;`
-
-`docker-compose.prod.yml` is also already configured to mount `/etc/letsencrypt` into the nginx container.
-
-For first deployment, start nginx after issuing the certificate:
+## 6. Verify Deployment
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d nginx
+cd "$APP_DIR"
+docker compose -f "$COMPOSE_FILE" ps
+
+# App health (bypasses nginx)
+docker compose -f "$COMPOSE_FILE" exec app wget -qO- http://127.0.0.1:3000/api/health
+
+# Nginx and public HTTPS
+curl http://127.0.0.1/nginx-health
+curl -I "https://$HOSTNAME"
 ```
 
-For subsequent deployments, restart nginx if needed:
+## 7. Updating After Source Code Changes (Redeploy)
+
+Use this for any app code, dependency, migration, or deployment-config changes.
 
 ```bash
-docker compose -f docker-compose.prod.yml restart nginx
-```
-
-Verify nginx after starting:
-
-```bash
-curl http://localhost/nginx-health
-curl -I https://indianvillagemanor.org
-```
-
-## Updating After Source Code Changes
-
-```bash
-cd /opt/ivm
-
-# Pull latest code
+cd "$APP_DIR"
 git pull origin main
 
-# Rebuild and restart all services (migrations run automatically)
-docker compose -f docker-compose.prod.yml up -d --build
+# Always include --build so runtime image stays in sync
+docker compose -f "$COMPOSE_FILE" up -d --build
 
-# Verify
-docker compose -f docker-compose.prod.yml ps
-docker compose -f docker-compose.prod.yml exec app wget -qO- http://127.0.0.1:3000/api/health
-curl http://localhost/nginx-health
+# Verify after update
+docker compose -f "$COMPOSE_FILE" ps
+docker compose -f "$COMPOSE_FILE" exec app wget -qO- http://127.0.0.1:3000/api/health
+curl http://127.0.0.1/nginx-health
+curl -I "https://$HOSTNAME"
 ```
 
-Use this sequence whenever application code, dependencies, Prisma migrations,
-or deployment configuration files change.
+## 8. TLS Renewal
 
-## Rolling Back
-
-### Application Rollback
+Test renewal manually:
 
 ```bash
-# Check out previous version
+sudo certbot renew --dry-run
+```
+
+If using standalone renewal, add cron to briefly stop nginx:
+
+```bash
+sudo crontab -e
+```
+
+```cron
+15 3 * * * docker compose -f /opt/ivm/docker-compose.prod.yml stop nginx && certbot renew --quiet --standalone && docker compose -f /opt/ivm/docker-compose.prod.yml start nginx
+```
+
+Equivalent command with your parameters expanded:
+
+```bash
+docker compose -f "$APP_DIR/$COMPOSE_FILE" stop nginx && sudo certbot renew --quiet --standalone && docker compose -f "$APP_DIR/$COMPOSE_FILE" start nginx
+```
+
+## 9. Rollback
+
+Application rollback:
+
+```bash
+cd "$APP_DIR"
 git log --oneline -5
 git checkout <previous-commit>
-
-# Rebuild
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f "$COMPOSE_FILE" up -d --build
 ```
 
-### Database Rollback
-
-See [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md) for migration rollback procedures.
+Database rollback command (see `docs/DATABASE_MIGRATIONS.md` for process details):
 
 ```bash
-# Roll back last migration
-docker compose -f docker-compose.prod.yml run --rm --entrypoint "" migrate \
+docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "" migrate \
   npx prisma migrate resolve --rolled-back <migration-name>
 ```
 
-## Container Management
+## 10. Operations Commands
 
 ```bash
-# View logs
-docker compose -f docker-compose.prod.yml logs -f app
-docker compose -f docker-compose.prod.yml logs -f nginx
-docker compose -f docker-compose.prod.yml logs -f postgres
+cd "$APP_DIR"
 
-# Restart a single service
-docker compose -f docker-compose.prod.yml restart app
+# Logs
+docker compose -f "$COMPOSE_FILE" logs -f app
+docker compose -f "$COMPOSE_FILE" logs -f nginx
+docker compose -f "$COMPOSE_FILE" logs -f postgres
+
+# Restart one service
+docker compose -f "$COMPOSE_FILE" restart app
 
 # Stop all services
-docker compose -f docker-compose.prod.yml down
+docker compose -f "$COMPOSE_FILE" down
 
-# Stop and remove volumes (DESTRUCTIVE - data loss)
-docker compose -f docker-compose.prod.yml down -v
+# Destructive: remove volumes too
+docker compose -f "$COMPOSE_FILE" down -v
 ```
 
-## Persistent Volumes
+## 11. Troubleshooting
 
-| Volume | Mount Point | Description |
-|--------|-------------|-------------|
-| `postgres_data` | PostgreSQL data dir | Database storage |
-| `documents_data` | `/data/documents` | Uploaded committee documents |
-| `logs_data` | `/data/logs` | Audit log files (JSON-lines) |
-
-These volumes persist across container restarts and rebuilds.
-
-## Health Checks
-
-- **App**: `GET /api/health` - Returns database connectivity status
-- **Nginx**: `GET /nginx-health` - Returns 200 if Nginx is running
-- **PostgreSQL**: `pg_isready` command
-
-All three containers have Docker health checks configured. Use `docker compose ps` to see health status.
-
-## Troubleshooting
-
-### App won't start
+### Nginx restart loop (cannot connect to port 80/443)
 
 ```bash
-# Check logs
-docker compose -f docker-compose.prod.yml logs app
-
-# Common issues:
-# - DATABASE_URL incorrect (can't connect to postgres)
-# - Missing NEXTAUTH_SECRET
-# - Migration failure
+docker compose -f "$COMPOSE_FILE" logs nginx --tail=120
 ```
 
-### Database connection issues
+If logs show missing cert files (`fullchain.pem` / `privkey.pem`):
 
 ```bash
-# Check PostgreSQL is running
-docker compose -f docker-compose.prod.yml exec postgres pg_isready
-
-# Check DATABASE_URL matches postgres credentials
-docker compose -f docker-compose.prod.yml exec app env | grep DATABASE_URL
+docker compose -f "$COMPOSE_FILE" stop nginx
+sudo certbot certonly --standalone -d "$HOSTNAME" --agree-tos -m "$ADMIN_EMAIL" --non-interactive
+sudo ls -l "/etc/letsencrypt/live/$HOSTNAME/"
+docker compose -f "$COMPOSE_FILE" up -d nginx
 ```
 
-### Email not sending
+### Prisma CLI not found
+
+Do not run Prisma CLI inside `app` runtime container. Use `migrate` service:
 
 ```bash
-# Check email configuration
-docker compose -f docker-compose.prod.yml exec app env | grep EMAIL
-
-# Check app logs for email errors
-docker compose -f docker-compose.prod.yml logs app | grep -i email
+docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "" migrate npx prisma <command>
 ```
 
-### Nginx 502 Bad Gateway
-
-The app container is not ready or has crashed:
+### App health check without nginx
 
 ```bash
-docker compose -f docker-compose.prod.yml restart app
-docker compose -f docker-compose.prod.yml logs app
-```
-
-### Nginx restart loop (can't connect to port 80/443)
-
-If `nginx` keeps restarting immediately after `up -d`, it is commonly due to missing
-Let's Encrypt certificate files referenced in `nginx/default.conf`:
-
-```bash
-docker compose -f docker-compose.prod.yml logs nginx --tail=100
-```
-
-If logs show certificate file errors (`fullchain.pem` or `privkey.pem` not found),
-do one of the following:
-
-1. Issue certificates, then restart nginx:
-
-```bash
-docker compose -f docker-compose.prod.yml stop nginx
-sudo certbot certonly --standalone -d indianvillagemanor.org
-docker compose -f docker-compose.prod.yml up -d nginx
-```
-
-2. Temporary recovery: serve HTTP only until certificates are issued by removing the
-SSL `server` block from `nginx/default.conf`, then restart nginx.
-
-To confirm app health directly (bypassing nginx):
-
-```bash
-docker compose -f docker-compose.prod.yml exec app wget -qO- http://127.0.0.1:3000/api/health
-```
-
-### Disk space
-
-```bash
-# Check Docker disk usage
-docker system df
-
-# Clean unused images
-docker image prune -a
-
-# Check data volumes
-du -sh /data/documents /data/logs
+docker compose -f "$COMPOSE_FILE" exec app wget -qO- http://127.0.0.1:3000/api/health
 ```
