@@ -98,6 +98,10 @@ POSTGRES_USER="ivm_user"
 POSTGRES_PASSWORD="<strong-db-password>"
 POSTGRES_DB="ivm_db"
 
+# Optional convenience value for host-side tools; docker-compose.prod.yml
+# constructs the in-container DATABASE_URL from POSTGRES_* using host `postgres`.
+DATABASE_URL="postgresql://ivm_user:<strong-db-password>@localhost:5432/ivm_db"
+
 EMAIL_SERVER="smtps://username:password@smtp.example.com:465"
 EMAIL_FROM="Indian Village Manor <noreply@${HOSTNAME}>"
 
@@ -113,6 +117,10 @@ Generate secrets quickly:
 ```bash
 openssl rand -base64 32
 ```
+
+For production deployments, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and
+`POSTGRES_DB` are required in `.env`. `docker-compose.prod.yml` does not use the
+host-side `DATABASE_URL` value for the app or migration containers.
 
 ## 4. TLS Certificate (First Deployment Only)
 
@@ -170,6 +178,9 @@ git pull origin main
 
 # Always include --build so runtime image stays in sync
 docker compose -f "$COMPOSE_FILE" up -d --build
+
+# If this fails, inspect the migration container first
+docker compose -f "$COMPOSE_FILE" logs migrate --tail=200
 
 # Verify after update
 docker compose -f "$COMPOSE_FILE" ps
@@ -275,6 +286,45 @@ Do not run Prisma CLI inside `app` runtime container. Use `migrate` service:
 ```bash
 docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "" migrate npx prisma <command>
 ```
+
+### Migrate container exits 1 during deploy
+
+The `migrate` service runs `prisma migrate deploy`. Check its logs first:
+
+```bash
+docker compose -f "$COMPOSE_FILE" logs migrate --tail=200
+```
+
+Useful follow-up checks:
+
+```bash
+docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "" migrate npx prisma migrate status
+docker compose -f "$COMPOSE_FILE" ps
+```
+
+### Prisma P1000 authentication failed
+
+If logs show `P1000: Authentication failed against database server`, the
+`POSTGRES_USER` or `POSTGRES_PASSWORD` values in `.env` do not match the
+credentials stored in the existing PostgreSQL data volume.
+
+Important: `POSTGRES_*` environment variables are only used to initialize a new
+database volume. Changing them later in `.env` does not update the existing
+database user password inside Postgres.
+
+Check the values currently configured for the deployment:
+
+```bash
+grep -E '^(POSTGRES_USER|POSTGRES_PASSWORD|POSTGRES_DB)=' "$APP_DIR/.env"
+docker compose -f "$COMPOSE_FILE" exec postgres env | grep '^POSTGRES_'
+```
+
+If `.env` was changed after the database volume was created, either restore the
+original credentials in `.env` or update the password inside Postgres to match.
+
+If `.env` only contains `DATABASE_URL`, add the matching `POSTGRES_*` values and
+redeploy. The production compose file uses `POSTGRES_*` to build the container
+connection string.
 
 ### App health check without nginx
 
