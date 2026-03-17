@@ -157,7 +157,7 @@ curl http://localhost/nginx-health
 curl -I https://indianvillagemanor.org
 ```
 
-## Updating the Application
+## Updating After Source Code Changes
 
 ```bash
 cd /opt/ivm
@@ -165,7 +165,7 @@ cd /opt/ivm
 # Pull latest code
 git pull origin main
 
-# Rebuild and restart (migrations run automatically)
+# Rebuild and restart all services (migrations run automatically)
 docker compose -f docker-compose.prod.yml up -d --build
 
 # Verify
@@ -173,6 +173,9 @@ docker compose -f docker-compose.prod.yml ps
 docker compose -f docker-compose.prod.yml exec app wget -qO- http://127.0.0.1:3000/api/health
 curl http://localhost/nginx-health
 ```
+
+Use this sequence whenever application code, dependencies, Prisma migrations,
+or deployment configuration files change.
 
 ## Rolling Back
 

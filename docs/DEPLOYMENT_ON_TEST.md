@@ -92,7 +92,6 @@ Edit `.env` with production-like test values:
 # Domain
 NEXTAUTH_URL="https://server.domain.com"
 NEXT_PUBLIC_APP_URL="https://server.domain.com"
-TLS_DOMAIN="server.domain.com"
 
 # Strong secrets
 NEXTAUTH_SECRET="<openssl-rand-base64-32>"
@@ -159,10 +158,11 @@ server {
     listen 80;
     server_name server.domain.com;
 
-  location /nginx-health {
-    access_log off;
-    return 200 "healthy\n";
-    add_header Content-Type text/plain;
+    # Keep health endpoint on HTTP for container health checks
+    location /nginx-health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
     }
 
     location / {
@@ -171,7 +171,8 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name server.domain.com;
 
     ssl_certificate /etc/letsencrypt/live/server.domain.com/fullchain.pem;
@@ -193,7 +194,7 @@ server {
         proxy_pass http://nextjs;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
+        proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -201,18 +202,12 @@ server {
         proxy_cache_bypass $http_upgrade;
         proxy_read_timeout 86400;
     }
-
-    location /nginx-health {
-        access_log off;
-        return 200 "healthy\n";
-        add_header Content-Type text/plain;
-    }
 }
 ```
 
 ## 8. Update Compose for Port 443 + Cert Mount
 
-Edit `docker-compose.prod.yml` and update the `nginx` service:
+`docker-compose.prod.yml` should contain the following `nginx` service settings:
 
 ```yaml
 nginx:
@@ -223,13 +218,13 @@ nginx:
     app:
       condition: service_healthy
   ports:
-    - "80:80"
-    - "443:443"
+    - "${HTTP_PORT:-80}:80"
+    - "${HTTPS_PORT:-443}:443"
   volumes:
     - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     - /etc/letsencrypt:/etc/letsencrypt:ro
   healthcheck:
-    test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nginx-health"]
+    test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/nginx-health"]
     interval: 15s
     timeout: 5s
     retries: 3
@@ -237,12 +232,15 @@ nginx:
     - ivm-network
 ```
 
+If your file already matches this, no compose edits are needed.
+
 ## 9. Build and Start the Full Stack
 
 From `/opt/ivm`:
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d --build postgres app
+docker compose -f docker-compose.prod.yml up -d nginx
 ```
 
 What happens:
@@ -250,19 +248,19 @@ What happens:
 1. PostgreSQL starts and becomes healthy
 2. `migrate` container runs Prisma migrations (`prisma migrate deploy`) and exits successfully
 3. The app image is rebuilt, including `poppler-utils` (`pdftoppm`) for newsletter PDF thumbnails
-4. Nginx starts and proxies HTTPS traffic to the app
+4. Nginx starts (after certs exist) and proxies HTTPS traffic to the app
 
 ## 10. Seed Database (First Deployment Only)
 
 ```bash
-docker compose -f docker-compose.prod.yml run --rm --entrypoint sh migrate -lc 'export PATH=/app/node_modules/.bin:$PATH && prisma db seed'
+docker compose -f docker-compose.prod.yml run --rm --entrypoint "" migrate npx prisma db seed
 ```
 
 Why this command:
 
 - The `app` runtime image is slim and does not include the Prisma CLI.
 - The `migrate` image is built from the full builder stage and has the Prisma CLI and seed dependencies.
-- `tsx` is installed in `node_modules/.bin`, so this command explicitly adds that path before running `prisma db seed`.
+- `npx prisma db seed` uses the project's configured Prisma seed command.
 
 ## 11. Verify Deployment
 
@@ -286,7 +284,30 @@ Open in browser:
 - `https://server.domain.com/auth/login`
 - `https://server.domain.com/register`
 
-## 12. Useful Runtime Commands
+## 12. Updating After Source Code Changes
+
+From `/opt/ivm`:
+
+```bash
+cd /opt/ivm
+
+# Pull latest code
+git pull origin main
+
+# Rebuild and restart all services (migrations run automatically)
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Verify
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml exec app wget -qO- http://127.0.0.1:3000/api/health
+curl http://127.0.0.1/nginx-health
+curl -I https://server.domain.com
+```
+
+Use this sequence whenever app code, dependencies, Prisma migrations, or
+deployment configuration files change.
+
+## 13. Useful Runtime Commands
 
 ```bash
 # Follow logs
@@ -305,7 +326,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 The `--build` matters here: it rebuilds the `app` image, which is where the PDF thumbnail dependency is installed. Skipping the rebuild can leave the server on an older image without the current thumbnail-generation behavior.
 
-## 13. TLS Renewal
+## 14. TLS Renewal
 
 Let's Encrypt certs expire every 90 days.
 
@@ -334,7 +355,7 @@ sudo journalctl -u cron --since "1 day ago"
 sudo ls -l /etc/letsencrypt/live/server.domain.com/
 ```
 
-## 14. Smoke Test Checklist
+## 15. Smoke Test Checklist
 
 Run this checklist after deployment:
 
@@ -346,7 +367,7 @@ Run this checklist after deployment:
 6. `GET /api/health` reports `"status":"ok"` and database connected.
 7. App, Nginx, and Postgres containers remain healthy for at least 10 minutes.
 
-## 15. Tear Down (Optional)
+## 16. Tear Down (Optional)
 
 To remove running containers but keep data volumes:
 
