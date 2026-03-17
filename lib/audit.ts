@@ -125,9 +125,32 @@ export async function logAuditEvent(entry: AuditLogEntry): Promise<void> {
     return;
   }
 
+  // If userId is provided but userName/userEmail are missing, look up the user
+  // so that formatActor() can produce a meaningful actor name instead of "anonymous".
+  let enrichedEntry = entry;
+  if (entry.userId && !entry.userName && !entry.userEmail) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: entry.userId },
+        select: { firstName: true, lastName: true, email: true, unitNumber: true },
+      });
+      if (user) {
+        enrichedEntry = {
+          ...entry,
+          userName: `${user.firstName} ${user.lastName}`,
+          userEmail: user.email,
+          unitNumber: entry.unitNumber || user.unitNumber,
+        };
+      }
+    } catch (err) {
+      // If lookup fails, log the error and proceed with the original entry
+      console.error('Failed to look up user for audit log enrichment:', err);
+    }
+  }
+
   await Promise.all([
-    writeToLogFile(entry),
-    writeToDatabase(entry),
+    writeToLogFile(enrichedEntry),
+    writeToDatabase(enrichedEntry),
   ]);
 }
 
