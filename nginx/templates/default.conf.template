@@ -1,9 +1,10 @@
-# This file is no longer used by docker-compose.prod.yml.
-# The active configuration is nginx/templates/default.conf.template,
-# which the official nginx Docker image processes at startup, substituting
-# the NGINX_HOST environment variable for the server hostname.
-#
-# To modify nginx behaviour, edit nginx/templates/default.conf.template.
+upstream nextjs {
+    server app:3000;
+}
+
+server {
+    listen 80;
+    server_name ${NGINX_HOST};
 
     # Keep health endpoint on HTTP for container health checks
     location /nginx-health {
@@ -20,10 +21,10 @@
 server {
     listen 443 ssl;
     http2 on;
-    server_name indianvillagemanor.org;
+    server_name ${NGINX_HOST};
 
-    ssl_certificate /etc/letsencrypt/live/indianvillagemanor.org/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/indianvillagemanor.org/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/${NGINX_HOST}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${NGINX_HOST}/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_session_timeout 1d;
     ssl_session_cache shared:SSL:10m;

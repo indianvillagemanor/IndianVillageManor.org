@@ -92,6 +92,8 @@ NEXT_PUBLIC_APP_URL="https://${HOSTNAME}"
 NEXTAUTH_SECRET="<openssl-rand-base64-32>"
 SESSION_SECRET="<openssl-rand-base64-32>"
 
+NGINX_HOST="${HOSTNAME}"
+
 POSTGRES_USER="ivm_user"
 POSTGRES_PASSWORD="<strong-db-password>"
 POSTGRES_DB="ivm_db"
@@ -112,7 +114,7 @@ Generate secrets quickly:
 openssl rand -base64 32
 ```
 
-## 4. TLS Certificate and Nginx Hostname Setup (First Deployment Only)
+## 4. TLS Certificate (First Deployment Only)
 
 Install certbot, issue certificate, then verify files exist:
 
@@ -122,22 +124,10 @@ sudo certbot certonly --standalone -d "$HOSTNAME" --agree-tos -m "$ADMIN_EMAIL" 
 sudo ls -l "/etc/letsencrypt/live/$HOSTNAME/"
 ```
 
-Update `nginx/default.conf` to use your hostname in all of these lines:
-
-- `server_name $HOSTNAME;`
-- `ssl_certificate /etc/letsencrypt/live/$HOSTNAME/fullchain.pem;`
-- `ssl_certificate_key /etc/letsencrypt/live/$HOSTNAME/privkey.pem;`
-
-Validate these lines quickly:
-
-```bash
-grep -nE 'server_name|ssl_certificate|ssl_certificate_key' "$APP_DIR/nginx/default.conf"
-```
-
-Verify compose mounts certs into nginx (already configured by default):
-
-- `./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro`
-- `/etc/letsencrypt:/etc/letsencrypt:ro`
+No manual nginx config editing is required. The nginx container reads
+`nginx/templates/default.conf.template` and substitutes `${NGINX_HOST}` at
+startup from the value set in `.env`. As long as `NGINX_HOST` in `.env` matches
+the hostname your certificate was issued for, nginx will start cleanly.
 
 ## 5. Build and Start (First Deployment)
 
@@ -258,7 +248,16 @@ docker compose -f "$COMPOSE_FILE" down -v
 docker compose -f "$COMPOSE_FILE" logs nginx --tail=120
 ```
 
-If logs show missing cert files (`fullchain.pem` / `privkey.pem`):
+**Cause: missing or wrong cert files** — logs show `cannot load certificate ... No such file or directory`.
+
+Check that `NGINX_HOST` in `.env` exactly matches the hostname your cert was issued for:
+
+```bash
+grep NGINX_HOST "$APP_DIR/.env"
+sudo ls /etc/letsencrypt/live/
+```
+
+If the cert is missing for that hostname, issue it:
 
 ```bash
 docker compose -f "$COMPOSE_FILE" stop nginx
@@ -266,6 +265,8 @@ sudo certbot certonly --standalone -d "$HOSTNAME" --agree-tos -m "$ADMIN_EMAIL" 
 sudo ls -l "/etc/letsencrypt/live/$HOSTNAME/"
 docker compose -f "$COMPOSE_FILE" up -d nginx
 ```
+
+**Cause: git merge conflict markers in template** — logs show `unknown directive "<<<<<<"`; resolve the conflict in `nginx/templates/default.conf.template` and redeploy.
 
 ### Prisma CLI not found
 
