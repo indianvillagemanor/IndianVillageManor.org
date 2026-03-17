@@ -43,20 +43,20 @@ export async function generatePdfThumbnail(
   try {
     await ensureThumbnailsDir();
 
-    // Output prefix: pdftoppm writes {prefix}-1.png for the first page
     const outputPrefix = path.join(THUMBNAILS_DIR, documentId);
-    const expectedOutput = `${outputPrefix}-1.png`;
-    const finalPath = path.join(THUMBNAILS_DIR, `${documentId}.png`);
+    const finalPath = `${outputPrefix}.png`;
 
     // Use execFile with an argument array (never a shell string) to avoid command injection.
     // -r 96:          96 DPI — good balance of size and clarity for a thumbnail
     // -f 1 -l 1:      only render first page
+    // -singlefile:    always write a single predictable output file with no numeric suffix
     // -png:           output as PNG
     // -scale-to-x 600 -scale-to-y -1: scale to 600 px wide, preserve aspect ratio
     await execFileAsync('pdftoppm', [
       '-r', '96',
       '-f', '1',
       '-l', '1',
+      '-singlefile',
       '-png',
       '-scale-to-x', '600',
       '-scale-to-y', '-1',
@@ -64,8 +64,7 @@ export async function generatePdfThumbnail(
       outputPrefix,
     ]);
 
-    // Rename pdftoppm output to a clean filename
-    await fs.rename(expectedOutput, finalPath);
+    await fs.access(finalPath);
 
     // Return relative path used in DB
     return `thumbnails/${documentId}.png`;
