@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVM Registration Walkthrough & Feedback</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #222;
+            line-height: 1.5;
+            margin: 0 auto;
+            max-width: 800px;
+            padding: 40px 20px;
+            background-color: #fff;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #444;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo-container {
+            flex: 1;
+        }
+
+        .logo {
+            height: 130px;
+            width: auto;
+            /* The logo is already black/white according to the filename, but adding grayscale just in case */
+            filter: grayscale(100%);
+        }
+
+        .qr-container {
+            text-align: center;
+            font-size: 14px;
+            color: #444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-code {
+            width: 110px;
+            height: 110px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            padding: 4px;
+            background: #fff;
+        }
+
+        .qr-url {
+            font-weight: bold;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        h1, h2, h3 {
+            color: #111;
+            margin-top: 0;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .intro-text {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .walkthrough-steps {
+            list-style-type: none;
+            padding: 0;
+            counter-reset: step-counter;
+        }
+
+        .walkthrough-steps li {
+            position: relative;
+            padding-left: 45px;
+            margin-bottom: 18px;
+            color: #333;
+        }
+
+        .walkthrough-steps li::before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            position: absolute;
+            left: 0;
+            top: -2px;
+            width: 28px;
+            height: 28px;
+            background-color: #f5f5f5;
+            border: 1px solid #888;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .callout {
+            text-align: center;
+            font-weight: bold;
+            font-style: italic;
+            color: #444;
+            margin-top: 50px;
+            padding: 15px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .qa-box {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 25px;
+            border-radius: 6px;
+        }
+
+        .submission-instructions {
+            background-color: #eee;
+            border-left: 4px solid #666;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .question {
+            margin-bottom: 30px;
+            break-inside: avoid;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+            color: #222;
+        }
+
+        .answer-line {
+            border-bottom: 1px solid #aaa;
+            height: 35px;
+            margin-bottom: 15px;
+        }
+
+        @media print {
+            .page-break {
+                page-break-before: always;
+                break-before: page;
+            }
+            body {
+                padding: 0;
+                font-size: 12pt;
+                max-width: 100%;
+            }
+            .section {
+                margin-bottom: 30px;
+            }
+            .qa-box {
+                border: 2px solid #333;
+                background-color: transparent;
+                padding: 20px;
+            }
+            .submission-instructions {
+                background-color: transparent;
+                border: 1px solid #666;
+            }
+            .answer-line {
+                border-bottom: 1px solid #666;
+            }
+            .walkthrough-steps li::before {
+                background-color: transparent;
+                border-color: #333;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-container">
+            <img src="./public/IVM%20Logo%20Design_Black_24%200225_t.png" alt="Indian Village Manor Logo" class="logo">
+        </div>
+        <div class="qr-container">
+            <!-- Utilizing a reliable external API to generate the QR code to the homepage inline -->
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://indianvillagemanor.org&color=000000&bgcolor=ffffff" alt="QR Code to https://indianvillagemanor.org" class="qr-code">
+            <span class="qr-url">indianvillagemanor.org</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Registration Walkthrough</h2>
+        <p class="intro-text">Welcome! We are testing our new registration process. Please follow the steps below to create your account and then share your feedback in the section below.</p>
+        <ol class="walkthrough-steps">
+            <li><strong>Visit the website:</strong> Scan the QR code above or type <em>https://indianvillagemanor.org</em> into your web browser.</li>
+            <li><strong>Find the Registration Page:</strong> Locate and click the "Register" or "Create an account" link from the homepage navigation menu.</li>
+            <li><strong>Fill out the form:</strong> Provide your details including Name, Email, Phone, and Unit Number. Make sure to indicate whether you are a Resident, an Owner, or both.</li>
+            <li><strong>Submit your information:</strong> After submitting, you should see a "Verification required" message. Your account will be in a pending state until an administrator reviews and approves it.</li>
+            <li><strong>Wait for Verification:</strong> Once verified by our team, you will receive an email. Going forward, you can securely log in using a "Magic Link" sent directly to your inbox.</li>
+        </ol>
+    </div>
+
+    <div class="callout">
+        Please see the next page for the Feedback section! ➔
+    </div>
+
+    <div class="section qa-box page-break">
+        <h2>Feedback</h2>
+        <div class="submission-instructions">
+            <strong>How to submit your feedback:</strong><br>
+            Please complete this short questionnaire. You may bring your written responses to our next Communications Committee meeting, or email the text (or a photo of this completed page) to <strong>communications@indianvillagemanor.org</strong>.
+        </div>
+
+        <div class="question">
+            <span class="question-text">1. How easy was it to find the registration link on the homepage?</span>
+            <div class="answer-line"></div>
+            <div class="answer-line"></div>
+        </div>
+
+        <div class="question">
+            <span class="question-text">2. Was the registration form clear and intuitive? Were any fields or requirements confusing?</span>
+            <div class="answer-line"></div>
+            <div class="answer-line"></div>
+        </div>
+
+        <div class="question">
+            <span class="question-text">3. How clear was the messaging explaining that manual verification is required before you can log in?</span>
+            <div class="answer-line"></div>
+            <div class="answer-line"></div>
+        </div>
+
+        <div class="question">
+            <span class="question-text">4. Do you have any additional comments or suggestions to improve the signup and login experience?</span>
+            <div class="answer-line"></div>
+            <div class="answer-line"></div>
+        </div>
+    </div>
+
+</body>
+</html>
