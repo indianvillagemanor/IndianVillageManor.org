@@ -59,9 +59,9 @@ Edit `.env` with production values:
 # Database - match docker-compose.prod.yml credentials
 DATABASE_URL="postgresql://ivm_user:STRONG_PASSWORD_HERE@postgres:5432/ivm_db"
 
-# Application URL (your domain)
-NEXTAUTH_URL="https://yourdomain.com"
-NEXT_PUBLIC_APP_URL="https://yourdomain.com"
+# Application URL
+NEXTAUTH_URL="https://indianvillagemanor.org"
+NEXT_PUBLIC_APP_URL="https://indianvillagemanor.org"
 
 # Generate secure secrets
 NEXTAUTH_SECRET="$(openssl rand -base64 32)"
@@ -69,7 +69,7 @@ SESSION_SECRET="$(openssl rand -base64 32)"
 
 # Email - SMTP connection string
 EMAIL_SERVER="smtps://user:password@smtp.gmail.com:465"
-EMAIL_FROM="Indian Village Manor <noreply@yourdomain.com>"
+EMAIL_FROM="Indian Village Manor <noreply@indianvillagemanor.org>"
 
 # SSO (optional)
 # GOOGLE_CLIENT_ID="..."
@@ -121,43 +121,28 @@ docker compose -f docker-compose.prod.yml logs app
 
 ## SSL/TLS Configuration
 
-### Option A: Certbot (Let's Encrypt)
+### Certbot (Let's Encrypt)
 
 ```bash
 # Install certbot
 sudo apt install certbot
 
 # Get certificate
-sudo certbot certonly --standalone -d yourdomain.com
-
-# Update nginx/default.conf to include SSL
+sudo certbot certonly --standalone -d indianvillagemanor.org
 ```
 
-Update `nginx/default.conf` to add SSL server block:
+`nginx/default.conf` is already preconfigured with:
 
-```nginx
-server {
-    listen 443 ssl;
-    server_name yourdomain.com;
+- `ssl_certificate /etc/letsencrypt/live/indianvillagemanor.org/fullchain.pem;`
+- `ssl_certificate_key /etc/letsencrypt/live/indianvillagemanor.org/privkey.pem;`
 
-    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+`docker-compose.prod.yml` is also already configured to mount `/etc/letsencrypt` into the nginx container.
 
-    # ... same location blocks as port 80 config
-}
+After issuing the certificate, restart nginx:
+
+```bash
+docker compose -f docker-compose.prod.yml restart nginx
 ```
-
-Mount certificates in `docker-compose.prod.yml`:
-
-```yaml
-nginx:
-  volumes:
-    - /etc/letsencrypt:/etc/letsencrypt:ro
-```
-
-### Option B: Reverse Proxy (Cloudflare, AWS ALB, etc.)
-
-If using an external reverse proxy for SSL, keep Nginx on port 80 and configure the external proxy to forward to it.
 
 ## Updating the Application
 

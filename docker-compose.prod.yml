@@ -80,8 +80,7 @@ services:
       - "${HTTPS_PORT:-443}:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt/live/${TLS_DOMAIN:-server.domain.com}/fullchain.pem:/etc/nginx/certs/fullchain.pem:ro
-      - /etc/letsencrypt/live/${TLS_DOMAIN:-server.domain.com}/privkey.pem:/etc/nginx/certs/privkey.pem:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/nginx-health"]
       interval: 15s
