@@ -88,22 +88,22 @@ environment:
 ### 4. Build and Start
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d --build postgres app
 ```
 
 This will:
 1. Build the Next.js app (multi-stage Docker build)
 2. Start PostgreSQL
-3. Run Prisma migrations automatically (via docker-entrypoint.sh)
+3. Run Prisma migrations automatically (via the `migrate` service)
 4. Start the Next.js server
-5. Start Nginx reverse proxy
+5. Keep Nginx stopped until SSL certificates are created
 
 ### 5. Seed the Database
 
 On first deployment only:
 
 ```bash
-docker compose -f docker-compose.prod.yml exec app npx prisma db seed
+docker compose -f docker-compose.prod.yml run --rm --entrypoint "" migrate npx prisma db seed
 ```
 
 ### 6. Verify Deployment
@@ -112,8 +112,8 @@ docker compose -f docker-compose.prod.yml exec app npx prisma db seed
 # Check container health
 docker compose -f docker-compose.prod.yml ps
 
-# Check health endpoint
-curl http://localhost/api/health
+# Check app health directly (bypasses nginx)
+docker compose -f docker-compose.prod.yml exec app wget -qO- http://127.0.0.1:3000/api/health
 
 # Check logs
 docker compose -f docker-compose.prod.yml logs app
@@ -138,10 +138,23 @@ sudo certbot certonly --standalone -d indianvillagemanor.org
 
 `docker-compose.prod.yml` is also already configured to mount `/etc/letsencrypt` into the nginx container.
 
-After issuing the certificate, restart nginx:
+For first deployment, start nginx after issuing the certificate:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d nginx
+```
+
+For subsequent deployments, restart nginx if needed:
 
 ```bash
 docker compose -f docker-compose.prod.yml restart nginx
+```
+
+Verify nginx after starting:
+
+```bash
+curl http://localhost/nginx-health
+curl -I https://indianvillagemanor.org
 ```
 
 ## Updating the Application
@@ -157,7 +170,8 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 # Verify
 docker compose -f docker-compose.prod.yml ps
-curl http://localhost/api/health
+docker compose -f docker-compose.prod.yml exec app wget -qO- http://127.0.0.1:3000/api/health
+curl http://localhost/nginx-health
 ```
 
 ## Rolling Back
@@ -179,7 +193,7 @@ See [DATABASE_MIGRATIONS.md](./DATABASE_MIGRATIONS.md) for migration rollback pr
 
 ```bash
 # Roll back last migration
-docker compose -f docker-compose.prod.yml exec app \
+docker compose -f docker-compose.prod.yml run --rm --entrypoint "" migrate \
   npx prisma migrate resolve --rolled-back <migration-name>
 ```
 
@@ -260,6 +274,35 @@ The app container is not ready or has crashed:
 ```bash
 docker compose -f docker-compose.prod.yml restart app
 docker compose -f docker-compose.prod.yml logs app
+```
+
+### Nginx restart loop (can't connect to port 80/443)
+
+If `nginx` keeps restarting immediately after `up -d`, it is commonly due to missing
+Let's Encrypt certificate files referenced in `nginx/default.conf`:
+
+```bash
+docker compose -f docker-compose.prod.yml logs nginx --tail=100
+```
+
+If logs show certificate file errors (`fullchain.pem` or `privkey.pem` not found),
+do one of the following:
+
+1. Issue certificates, then restart nginx:
+
+```bash
+docker compose -f docker-compose.prod.yml stop nginx
+sudo certbot certonly --standalone -d indianvillagemanor.org
+docker compose -f docker-compose.prod.yml up -d nginx
+```
+
+2. Temporary recovery: serve HTTP only until certificates are issued by removing the
+SSL `server` block from `nginx/default.conf`, then restart nginx.
+
+To confirm app health directly (bypassing nginx):
+
+```bash
+docker compose -f docker-compose.prod.yml exec app wget -qO- http://127.0.0.1:3000/api/health
 ```
 
 ### Disk space
