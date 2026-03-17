@@ -1,4 +1,11 @@
-import { escapeHtml, sanitizeString, sanitizeFilename, sanitizeEmail, hasSqlInjectionPatterns } from '@/lib/sanitize';
+import {
+  escapeHtml,
+  sanitizeString,
+  sanitizeFilename,
+  normalizeDownloadFilename,
+  sanitizeEmail,
+  hasSqlInjectionPatterns,
+} from '@/lib/sanitize';
 
 describe('sanitize', () => {
   describe('escapeHtml', () => {
@@ -58,6 +65,28 @@ describe('sanitize', () => {
 
     it('removes null bytes', () => {
       expect(sanitizeFilename('file\0name.txt')).toBe('filename.txt');
+    });
+  });
+
+  describe('normalizeDownloadFilename', () => {
+    it('removes a generated hex prefix from stored filenames', () => {
+      expect(normalizeDownloadFilename('8a9b2c3d_Committee_Minutes.pdf')).toBe('Committee_Minutes.pdf');
+    });
+
+    it('removes mixed-case hex prefixes', () => {
+      expect(normalizeDownloadFilename('Ab12Cd34_March_Newsletter.pdf')).toBe('March_Newsletter.pdf');
+    });
+
+    it('leaves filenames without the generated prefix unchanged', () => {
+      expect(normalizeDownloadFilename('Committee_Minutes.pdf')).toBe('Committee_Minutes.pdf');
+    });
+
+    it('preserves filenames with additional underscores after the prefix', () => {
+      expect(normalizeDownloadFilename('8a9b2c3d_board_packet_final_v2.pdf')).toBe('board_packet_final_v2.pdf');
+    });
+
+    it('does not strip non-matching prefixes', () => {
+      expect(normalizeDownloadFilename('abc123_report.pdf')).toBe('abc123_report.pdf');
     });
   });
 

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { isBot } from '@/lib/audit';
+import { normalizeDownloadFilename } from '@/lib/sanitize';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   };
   const contentType = contentTypeMap[ext] || 'application/octet-stream';
 
-  const filename = path.basename(document.filename);
+  const filename = normalizeDownloadFilename(path.basename(document.filename));
   const encodedFilename = encodeURIComponent(filename);
 
   const cacheControl = isPublicNewsletter

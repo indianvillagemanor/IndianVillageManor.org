@@ -43,6 +43,13 @@ export function sanitizeFilename(filename: string): string {
 }
 
 /**
+ * Remove the generated upload prefix from a stored filename for download display.
+ */
+export function normalizeDownloadFilename(filename: string): string {
+  return filename.replace(/^([0-9a-fA-F]{8})_/, '');
+}
+
+/**
  * Validate and sanitize an email address.
  */
 export function sanitizeEmail(email: string): string {
