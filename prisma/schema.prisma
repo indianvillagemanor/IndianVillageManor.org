@@ -84,26 +84,37 @@ model Committee {
 }
 
 model Document {
-  id            String    @id @default(uuid())
+  id            String             @id @default(uuid())
   committeeId   String
-  committee     Committee @relation(fields: [committeeId], references: [id])
+  committee     Committee          @relation(fields: [committeeId], references: [id])
   title         String
-  filename      String    // path within mounted volume
-  published     Boolean   @default(false)
-  archived      Boolean   @default(false)
-  deleted       Boolean   @default(false)
-  isNewsletter  Boolean   @default(false)
-  thumbnailPath String?   // relative path to first-page thumbnail image
-  uploadedBy    String    // User.id reference
-  uploadedAt    DateTime  @default(now())
-  deletedBy     String?   // User.id reference
+  filename      String             // path within mounted volume
+  published     Boolean            @default(false)
+  archived      Boolean            @default(false)
+  deleted       Boolean            @default(false)
+  isNewsletter  Boolean            @default(false)
+  thumbnailPath String?            // relative path to first-page thumbnail image
+  uploadedBy    String             // User.id reference
+  uploadedAt    DateTime           @default(now())
+  deletedBy     String?            // User.id reference
   deletedAt     DateTime?
+  downloads     DocumentDownload[]
 
   @@index([committeeId])
   @@index([published])
   @@index([archived])
   @@index([deleted])
   @@index([isNewsletter])
+}
+
+model DocumentDownload {
+  id           String   @id @default(uuid())
+  documentId   String
+  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  downloadedAt DateTime @default(now())
+
+  @@index([documentId])
+  @@index([documentId, downloadedAt])
 }
 
 model Event {

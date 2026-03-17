@@ -19,6 +19,11 @@ interface DocumentItem {
   deletedAt: string | null;
 }
 
+interface DocumentStats {
+  totalDownloads: number;
+  peakDay: { date: string; count: number } | null;
+}
+
 // ---- Styles ----
 
 const pageStyle: React.CSSProperties = {
@@ -225,6 +230,12 @@ const emptyStyle: React.CSSProperties = {
 
 const sectionStyle: React.CSSProperties = { marginBottom: '32px' };
 
+const downloadStatStyle: React.CSSProperties = {
+  fontSize: '0.80rem',
+  color: '#555',
+  marginTop: '4px',
+};
+
 const renameTitleInputStyle: React.CSSProperties = {
   ...inputStyle,
   fontSize: '0.95rem',
@@ -281,6 +292,9 @@ export default function DocumentsManagePage() {
   const [renameError, setRenameError] = useState('');
   const [renameProcessing, setRenameProcessing] = useState(false);
 
+  // Download stats (map of documentId -> stats)
+  const [docStats, setDocStats] = useState<Record<string, DocumentStats>>({});
+
   const fetchDocuments = useCallback(async () => {
     if (!committeeId) return;
     try {
@@ -298,14 +312,35 @@ export default function DocumentsManagePage() {
         router.push(`/committees/${committeeId}`);
         return;
       }
-      setDocuments(data.documents || []);
+      const docs: DocumentItem[] = data.documents || [];
+      setDocuments(docs);
       setHasNewsletterFeature(data.hasNewsletterFeature || false);
+      return docs;
     } catch {
       setError('Failed to load documents');
     } finally {
       setLoading(false);
     }
   }, [committeeId, router]);
+
+  // Fetch download stats for all non-deleted documents
+  const fetchStats = useCallback(async (docs: DocumentItem[]) => {
+    const nonDeleted = docs.filter(d => !d.deleted);
+    if (nonDeleted.length === 0) return;
+    const results = await Promise.allSettled(
+      nonDeleted.map(doc =>
+        fetch(`/api/documents/${doc.id}/stats`).then(r => r.ok ? r.json() : null)
+      )
+    );
+    const statsMap: Record<string, DocumentStats> = {};
+    nonDeleted.forEach((doc, i) => {
+      const result = results[i];
+      if (result.status === 'fulfilled' && result.value) {
+        statsMap[doc.id] = result.value as DocumentStats;
+      }
+    });
+    setDocStats(statsMap);
+  }, []);
 
   const fetchCommitteeName = useCallback(async () => {
     if (!committeeId) return;
@@ -331,10 +366,10 @@ export default function DocumentsManagePage() {
         router.push('/committees');
         return;
       }
-      fetchDocuments();
+      fetchDocuments().then(docs => { if (docs) fetchStats(docs); });
       fetchCommitteeName();
     }
-  }, [status, session, router, fetchDocuments, fetchCommitteeName]);
+  }, [status, session, router, fetchDocuments, fetchCommitteeName, fetchStats]);
 
   // When file changes, reset the newsletter checkbox if not a PDF
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -382,8 +417,9 @@ export default function DocumentsManagePage() {
       setFile(null);
       setIsNewsletterUpload(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
-      // Refresh documents
-      await fetchDocuments();
+      // Refresh documents and stats
+      const docs = await fetchDocuments();
+      if (docs) fetchStats(docs);
     } catch {
       setUploadError('Upload failed. Please try again.');
     } finally {
@@ -431,7 +467,8 @@ export default function DocumentsManagePage() {
       setSuccess(`Document renamed to "${trimmed}" successfully.`);
       setRenamingDocId(null);
       setRenameTitle('');
-      await fetchDocuments();
+      const docs = await fetchDocuments();
+      if (docs) fetchStats(docs);
     } catch {
       setRenameError('Rename failed. Please try again.');
     } finally {
@@ -488,7 +525,8 @@ export default function DocumentsManagePage() {
         unset_newsletter: 'unmarked as newsletter',
       };
       setSuccess(`Document ${actionLabels[action]} successfully.`);
-      await fetchDocuments();
+      const docs = await fetchDocuments();
+      if (docs) fetchStats(docs);
     } catch {
       setError(`Action failed. Please try again.`);
     } finally {
@@ -676,6 +714,33 @@ export default function DocumentsManagePage() {
                         day: 'numeric',
                       })}
                     </div>
+                    {(() => {
+                      const stats = docStats[doc.id];
+                      if (!stats) return null;
+                      const { totalDownloads, peakDay } = stats;
+                      return (
+                        <div style={downloadStatStyle}>
+                          {totalDownloads === 0
+                            ? 'No downloads yet'
+                            : (
+                              <>
+                                {totalDownloads}{' '}
+                                {totalDownloads === 1 ? 'download' : 'downloads'}
+                                {peakDay && (
+                                  <> &middot; Peak: {new Date(peakDay.date + 'T00:00:00Z').toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    timeZone: 'UTC',
+                                  })} ({peakDay.count}{' '}
+                                  {peakDay.count === 1 ? 'download' : 'downloads'})</>
+                                )}
+                              </>
+                            )
+                          }
+                        </div>
+                      );
+                    })()}
                     <div style={{ marginTop: '6px' }}>
                       {getStatusBadge(doc)}
                       {doc.isNewsletter && <span style={newsletterBadge}>Newsletter</span>}

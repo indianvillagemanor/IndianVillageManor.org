@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isBot } from '@/lib/audit';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -96,6 +97,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const cacheControl = isPublicNewsletter
     ? 'public, max-age=86400'
     : 'private, no-store';
+
+  // Record download stat (skip bots; non-blocking so it never delays the response)
+  const userAgent = request.headers.get('user-agent') || '';
+  if (!isBot(userAgent)) {
+    prisma.documentDownload.create({ data: { documentId } }).catch((err) => {
+      console.error('Failed to record document download stat:', err);
+    });
+  }
 
   return new NextResponse(new Uint8Array(fileBuffer), {
     status: 200,
