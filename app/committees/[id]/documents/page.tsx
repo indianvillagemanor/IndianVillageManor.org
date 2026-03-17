@@ -225,6 +225,13 @@ const emptyStyle: React.CSSProperties = {
 
 const sectionStyle: React.CSSProperties = { marginBottom: '32px' };
 
+const renameTitleInputStyle: React.CSSProperties = {
+  ...inputStyle,
+  fontSize: '0.95rem',
+  fontWeight: '600',
+  maxWidth: '400px',
+};
+
 // ---- Helpers ----
 
 function getBasename(filepath: string): string {
@@ -267,6 +274,12 @@ export default function DocumentsManagePage() {
 
   // Processing state for action buttons
   const [processing, setProcessing] = useState<string | null>(null);
+
+  // Rename state
+  const [renamingDocId, setRenamingDocId] = useState<string | null>(null);
+  const [renameTitle, setRenameTitle] = useState('');
+  const [renameError, setRenameError] = useState('');
+  const [renameProcessing, setRenameProcessing] = useState(false);
 
   const fetchDocuments = useCallback(async () => {
     if (!committeeId) return;
@@ -375,6 +388,54 @@ export default function DocumentsManagePage() {
       setUploadError('Upload failed. Please try again.');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const startRename = (doc: DocumentItem) => {
+    setRenamingDocId(doc.id);
+    setRenameTitle(doc.title);
+    setRenameError('');
+  };
+
+  const cancelRename = () => {
+    setRenamingDocId(null);
+    setRenameTitle('');
+    setRenameError('');
+  };
+
+  const handleRename = async (docId: string) => {
+    const trimmed = renameTitle.trim();
+    if (!trimmed) {
+      setRenameError('Title is required');
+      return;
+    }
+    if (trimmed.length > 200) {
+      setRenameError('Title must be 200 characters or fewer');
+      return;
+    }
+    setRenameProcessing(true);
+    setRenameError('');
+    setError('');
+    setSuccess('');
+    try {
+      const res = await fetch(`/api/documents/${docId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'rename', title: trimmed }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRenameError(data.error || 'Rename failed');
+        return;
+      }
+      setSuccess(`Document renamed to "${trimmed}" successfully.`);
+      setRenamingDocId(null);
+      setRenameTitle('');
+      await fetchDocuments();
+    } catch {
+      setRenameError('Rename failed. Please try again.');
+    } finally {
+      setRenameProcessing(false);
     }
   };
 
@@ -561,12 +622,52 @@ export default function DocumentsManagePage() {
               processing === doc.id + 'delete' ||
               processing === doc.id + 'set_newsletter' ||
               processing === doc.id + 'unset_newsletter';
+            const isRenaming = renamingDocId === doc.id;
+            const anyBusy = isProcessing || (isRenaming && renameProcessing);
             const canBeNewsletter = isPdf(doc.filename);
             return (
               <div key={doc.id} style={cardStyle}>
                 <div style={cardHeaderStyle}>
                   <div style={{ flex: 1 }}>
-                    <div style={docTitleStyle}>{doc.title}</div>
+                    {isRenaming ? (
+                      <div style={{ marginBottom: '6px' }}>
+                        <input
+                          type="text"
+                          value={renameTitle}
+                          onChange={e => { setRenameTitle(e.target.value); setRenameError(''); }}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') handleRename(doc.id);
+                            if (e.key === 'Escape') cancelRename();
+                          }}
+                          maxLength={200}
+                          disabled={renameProcessing}
+                          autoFocus
+                          style={renameTitleInputStyle}
+                          aria-label="Document title"
+                        />
+                        {renameError && (
+                          <div style={{ color: '#b91c1c', fontSize: '0.82rem', marginTop: '4px' }}>{renameError}</div>
+                        )}
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                          <button
+                            style={{ ...primaryButtonStyle, padding: '6px 16px', fontSize: '0.85rem', ...(renameProcessing ? disabledButtonStyle : {}) }}
+                            onClick={() => handleRename(doc.id)}
+                            disabled={renameProcessing}
+                          >
+                            {renameProcessing ? 'Saving…' : 'Save'}
+                          </button>
+                          <button
+                            style={{ ...actionButtonStyle, ...(renameProcessing ? disabledButtonStyle : {}) }}
+                            onClick={cancelRename}
+                            disabled={renameProcessing}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={docTitleStyle}>{doc.title}</div>
+                    )}
                     <div style={docMetaStyle}>
                       {getBasename(doc.filename)} &middot; Uploaded{' '}
                       {new Date(doc.uploadedAt).toLocaleDateString('en-US', {
@@ -591,22 +692,34 @@ export default function DocumentsManagePage() {
                       View
                     </a>
 
+                    {/* Rename button — hidden while actively renaming this doc */}
+                    {!isRenaming && (
+                      <button
+                        style={{ ...actionButtonStyle, color: '#374151', borderColor: '#d1d5db', ...(anyBusy ? disabledButtonStyle : {}) }}
+                        onClick={() => startRename(doc)}
+                        disabled={anyBusy}
+                        title="Rename document"
+                      >
+                        Rename
+                      </button>
+                    )}
+
                     {/* Newsletter toggle — only for committees with newsletter feature and PDF files */}
                     {hasNewsletterFeature && canBeNewsletter && (
                       doc.isNewsletter ? (
                         <button
-                          style={{ ...actionButtonStyle, color: '#6b21a8', borderColor: '#d8b4fe', ...(isProcessing ? disabledButtonStyle : {}) }}
+                          style={{ ...actionButtonStyle, color: '#6b21a8', borderColor: '#d8b4fe', ...(anyBusy ? disabledButtonStyle : {}) }}
                           onClick={() => handleAction(doc.id, 'unset_newsletter')}
-                          disabled={isProcessing}
+                          disabled={anyBusy}
                           title="Remove newsletter designation"
                         >
                           Unmark Newsletter
                         </button>
                       ) : (
                         <button
-                          style={{ ...actionButtonStyle, color: '#1e40af', borderColor: '#bfdbfe', ...(isProcessing ? disabledButtonStyle : {}) }}
+                          style={{ ...actionButtonStyle, color: '#1e40af', borderColor: '#bfdbfe', ...(anyBusy ? disabledButtonStyle : {}) }}
                           onClick={() => handleAction(doc.id, 'set_newsletter')}
-                          disabled={isProcessing}
+                          disabled={anyBusy}
                           title="Mark as newsletter (generates thumbnail)"
                         >
                           Mark as Newsletter
@@ -618,16 +731,16 @@ export default function DocumentsManagePage() {
                     {!doc.published && !doc.archived && (
                       <>
                         <button
-                          style={{ ...actionButtonStyle, color: '#166534', borderColor: '#86efac', ...(isProcessing ? disabledButtonStyle : {}) }}
+                          style={{ ...actionButtonStyle, color: '#166534', borderColor: '#86efac', ...(anyBusy ? disabledButtonStyle : {}) }}
                           onClick={() => handleAction(doc.id, 'publish')}
-                          disabled={isProcessing}
+                          disabled={anyBusy}
                         >
                           Publish
                         </button>
                         <button
-                          style={{ ...dangerButtonStyle, ...(isProcessing ? disabledButtonStyle : {}) }}
+                          style={{ ...dangerButtonStyle, ...(anyBusy ? disabledButtonStyle : {}) }}
                           onClick={() => handleAction(doc.id, 'delete')}
-                          disabled={isProcessing}
+                          disabled={anyBusy}
                         >
                           Delete
                         </button>
@@ -638,16 +751,16 @@ export default function DocumentsManagePage() {
                     {doc.published && (
                       <>
                         <button
-                          style={{ ...actionButtonStyle, color: '#854d0e', borderColor: '#fde68a', ...(isProcessing ? disabledButtonStyle : {}) }}
+                          style={{ ...actionButtonStyle, color: '#854d0e', borderColor: '#fde68a', ...(anyBusy ? disabledButtonStyle : {}) }}
                           onClick={() => handleAction(doc.id, 'archive')}
-                          disabled={isProcessing}
+                          disabled={anyBusy}
                         >
                           Archive
                         </button>
                         <button
-                          style={{ ...dangerButtonStyle, ...(isProcessing ? disabledButtonStyle : {}) }}
+                          style={{ ...dangerButtonStyle, ...(anyBusy ? disabledButtonStyle : {}) }}
                           onClick={() => handleAction(doc.id, 'delete')}
-                          disabled={isProcessing}
+                          disabled={anyBusy}
                         >
                           Delete
                         </button>
@@ -658,16 +771,16 @@ export default function DocumentsManagePage() {
                     {doc.archived && !doc.published && (
                       <>
                         <button
-                          style={{ ...actionButtonStyle, color: '#166534', borderColor: '#86efac', ...(isProcessing ? disabledButtonStyle : {}) }}
+                          style={{ ...actionButtonStyle, color: '#166534', borderColor: '#86efac', ...(anyBusy ? disabledButtonStyle : {}) }}
                           onClick={() => handleAction(doc.id, 'publish')}
-                          disabled={isProcessing}
+                          disabled={anyBusy}
                         >
                           Restore (Publish)
                         </button>
                         <button
-                          style={{ ...dangerButtonStyle, ...(isProcessing ? disabledButtonStyle : {}) }}
+                          style={{ ...dangerButtonStyle, ...(anyBusy ? disabledButtonStyle : {}) }}
                           onClick={() => handleAction(doc.id, 'delete')}
-                          disabled={isProcessing}
+                          disabled={anyBusy}
                         >
                           Delete
                         </button>
