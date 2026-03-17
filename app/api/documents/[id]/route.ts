@@ -71,20 +71,65 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     );
   }
 
-  let body: { action?: string };
+  let body: { action?: string; title?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { action } = body;
+  const { action, title: newTitle } = body;
 
-  if (action !== 'publish' && action !== 'archive' && action !== 'set_newsletter' && action !== 'unset_newsletter') {
+  if (
+    action !== 'publish' &&
+    action !== 'archive' &&
+    action !== 'set_newsletter' &&
+    action !== 'unset_newsletter' &&
+    action !== 'rename'
+  ) {
     return NextResponse.json(
-      { error: 'action must be "publish", "archive", "set_newsletter", or "unset_newsletter"' },
+      { error: 'action must be "publish", "archive", "set_newsletter", "unset_newsletter", or "rename"' },
       { status: 400 }
     );
+  }
+
+  // Handle rename
+  if (action === 'rename') {
+    if (typeof newTitle !== 'string') {
+      return NextResponse.json({ error: 'Title must be a string' }, { status: 400 });
+    }
+    const trimmedTitle = newTitle.trim();
+    if (!trimmedTitle) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+    }
+    if (trimmedTitle.length > 200) {
+      return NextResponse.json({ error: 'Title must be 200 characters or fewer' }, { status: 400 });
+    }
+
+    const updated = await prisma.document.update({
+      where: { id: documentId },
+      data: { title: trimmedTitle },
+    });
+
+    await logAuditEvent({
+      userId: session.user.id,
+      action: 'document_renamed',
+      entityType: 'Document',
+      entityId: documentId,
+      success: true,
+      details: {
+        committeeId: document.committeeId,
+        oldTitle: document.title,
+        newTitle: trimmedTitle,
+      },
+      ipAddress:
+        request.headers.get('x-forwarded-for') ||
+        request.headers.get('x-real-ip') ||
+        'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    });
+
+    return NextResponse.json({ document: updated });
   }
 
   // Handle newsletter toggling
