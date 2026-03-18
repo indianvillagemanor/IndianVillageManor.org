@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 interface EventItem {
   id: string;
@@ -12,6 +11,8 @@ interface EventItem {
   startAt: string;
   endAt: string | null;
   createdAt: string;
+  committeeId: string;
+  committeeName: string;
 }
 
 // --- Styles ---
@@ -36,20 +37,6 @@ const headingStyle: React.CSSProperties = {
   fontWeight: 'bold',
   color: '#2d5016',
   margin: 0,
-};
-
-const createBtnStyle: React.CSSProperties = {
-  display: 'inline-block',
-  padding: '10px 20px',
-  backgroundColor: '#00693f',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  fontSize: '0.95rem',
-  textDecoration: 'none',
-  whiteSpace: 'nowrap',
 };
 
 const subtitleStyle: React.CSSProperties = {
@@ -95,13 +82,6 @@ const cardPastStyle: React.CSSProperties = {
   backgroundColor: '#f9f9f9',
 };
 
-const cardHeaderStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  gap: '12px',
-};
-
 const eventTitleStyle: React.CSSProperties = {
   fontSize: '1.1rem',
   fontWeight: 'bold',
@@ -134,39 +114,13 @@ const pastBadgeStyle: React.CSSProperties = {
   verticalAlign: 'middle',
 };
 
-const actionBtnGroupStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: '8px',
-  flexShrink: 0,
-};
-
-const editBtnStyle: React.CSSProperties = {
-  padding: '6px 14px',
-  backgroundColor: '#2d5016',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontSize: '0.85rem',
+const committeeLinkStyle: React.CSSProperties = {
+  fontSize: '0.82rem',
+  color: '#00693f',
   fontWeight: 'bold',
   textDecoration: 'none',
+  marginTop: '6px',
   display: 'inline-block',
-};
-
-const deleteBtnStyle: React.CSSProperties = {
-  padding: '6px 14px',
-  backgroundColor: '#b91c1c',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontSize: '0.85rem',
-  fontWeight: 'bold',
-};
-
-const disabledBtnStyle: React.CSSProperties = {
-  opacity: 0.55,
-  cursor: 'not-allowed',
 };
 
 const emptyStyle: React.CSSProperties = {
@@ -174,65 +128,6 @@ const emptyStyle: React.CSSProperties = {
   padding: '48px 16px',
   color: '#666',
   fontSize: '1.1rem',
-};
-
-const errorStyle: React.CSSProperties = {
-  padding: '12px 16px',
-  backgroundColor: '#fef2f2',
-  color: '#b91c1c',
-  border: '1px solid #fecaca',
-  borderRadius: '8px',
-  marginBottom: '16px',
-};
-
-const confirmOverlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.45)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
-};
-
-const confirmBoxStyle: React.CSSProperties = {
-  backgroundColor: '#fff',
-  borderRadius: '10px',
-  padding: '28px 32px',
-  maxWidth: '420px',
-  width: '90%',
-  boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
-};
-
-const confirmTitleStyle: React.CSSProperties = {
-  fontSize: '1.15rem',
-  fontWeight: 'bold',
-  color: '#1f2937',
-  marginBottom: '10px',
-};
-
-const confirmTextStyle: React.CSSProperties = {
-  color: '#555',
-  marginBottom: '22px',
-  fontSize: '0.95rem',
-  lineHeight: '1.5',
-};
-
-const confirmBtnRowStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: '10px',
-  justifyContent: 'flex-end',
-};
-
-const cancelBtnStyle: React.CSSProperties = {
-  padding: '8px 18px',
-  backgroundColor: '#e5e7eb',
-  color: '#374151',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  fontSize: '0.95rem',
 };
 
 // --- Helpers ---
@@ -275,7 +170,6 @@ function isPast(startAt: string): boolean {
   return new Date(startAt) < new Date();
 }
 
-// Group events by month label
 function groupByMonth(events: EventItem[]): { label: string; events: EventItem[] }[] {
   const groups: { label: string; events: EventItem[] }[] = [];
   let currentLabel = '';
@@ -305,17 +199,9 @@ function groupByMonth(events: EventItem[]): { label: string; events: EventItem[]
 
 export default function EventsPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
-  const [error, setError] = useState('');
-  const [deleteTarget, setDeleteTarget] = useState<EventItem | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  const canManageEvents =
-    session?.user?.roles?.includes('calendar') ||
-    session?.user?.roles?.includes('dbadmin');
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -338,26 +224,6 @@ export default function EventsPage() {
     }
   }, [status, fetchEvents]);
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    setError('');
-    try {
-      const res = await fetch(`/api/events/${deleteTarget.id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Failed to delete event');
-      } else {
-        setEvents(prev => prev.filter(ev => ev.id !== deleteTarget.id));
-        setDeleteTarget(null);
-      }
-    } catch {
-      setError('Failed to delete event. Please try again.');
-    } finally {
-      setDeleting(false);
-    }
-  };
-
   if (status === 'loading' || loading) {
     return (
       <div style={pageStyle}>
@@ -371,43 +237,9 @@ export default function EventsPage() {
 
   return (
     <div style={pageStyle}>
-      {/* Confirm Delete Modal */}
-      {deleteTarget && (
-        <div style={confirmOverlayStyle}>
-          <div style={confirmBoxStyle}>
-            <div style={confirmTitleStyle}>Delete Event?</div>
-            <div style={confirmTextStyle}>
-              Are you sure you want to delete &ldquo;{deleteTarget.title}&rdquo;?
-              This action cannot be undone.
-            </div>
-            <div style={confirmBtnRowStyle}>
-              <button
-                style={cancelBtnStyle}
-                onClick={() => setDeleteTarget(null)}
-                disabled={deleting}
-              >
-                Cancel
-              </button>
-              <button
-                style={{ ...deleteBtnStyle, ...(deleting ? disabledBtnStyle : {}) }}
-                onClick={handleDeleteConfirm}
-                disabled={deleting}
-              >
-                {deleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Page header */}
       <div style={topBarStyle}>
         <h1 style={headingStyle}>Community Calendar</h1>
-        {canManageEvents && (
-          <Link href="/events/new" style={createBtnStyle}>
-            + Create Event
-          </Link>
-        )}
       </div>
 
       <p style={subtitleStyle}>
@@ -427,18 +259,9 @@ export default function EventsPage() {
         </div>
       )}
 
-      {error && <div style={errorStyle}>{error}</div>}
-
       {events.length === 0 ? (
         <div style={emptyStyle}>
           <p>No events to display at this time.</p>
-          {canManageEvents && (
-            <p style={{ marginTop: '12px', fontSize: '0.95rem' }}>
-              <Link href="/events/new" style={{ color: '#00693f', fontWeight: 'bold' }}>
-                Create the first event
-              </Link>
-            </p>
-          )}
         </div>
       ) : (
         <div>
@@ -449,37 +272,22 @@ export default function EventsPage() {
                 const past = isPast(event.startAt);
                 return (
                   <div key={event.id} style={past ? cardPastStyle : cardStyle}>
-                    <div style={cardHeaderStyle}>
-                      <div style={{ flex: 1 }}>
-                        <div style={eventTitleStyle}>
-                          {event.title}
-                          {past && <span style={pastBadgeStyle}>Past</span>}
-                        </div>
-                        <div style={eventDateStyle}>
-                          {formatEventDate(event.startAt, event.endAt)}
-                        </div>
-                        {event.description && (
-                          <div style={eventDescStyle}>{event.description}</div>
-                        )}
-                      </div>
-                      {canManageEvents && (
-                        <div style={actionBtnGroupStyle}>
-                          <Link
-                            href={`/events/${event.id}/edit`}
-                            style={editBtnStyle}
-                            onClick={() => router.prefetch(`/events/${event.id}/edit`)}
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            style={deleteBtnStyle}
-                            onClick={() => setDeleteTarget(event)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                    <div style={eventTitleStyle}>
+                      {event.title}
+                      {past && <span style={pastBadgeStyle}>Past</span>}
                     </div>
+                    <div style={eventDateStyle}>
+                      {formatEventDate(event.startAt, event.endAt)}
+                    </div>
+                    {event.description && (
+                      <div style={eventDescStyle}>{event.description}</div>
+                    )}
+                    <Link
+                      href={`/committees/${event.committeeId}`}
+                      style={committeeLinkStyle}
+                    >
+                      {event.committeeName} Committee
+                    </Link>
                   </div>
                 );
               })}

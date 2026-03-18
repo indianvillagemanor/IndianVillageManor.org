@@ -81,6 +81,7 @@ model Committee {
   hasNewsletterFeature Boolean    @default(false)
   members              User[]     @relation("Memberships")
   documents            Document[]
+  events               Event[]
 }
 
 model Document {
@@ -119,6 +120,8 @@ model DocumentDownload {
 
 model Event {
   id          String    @id @default(uuid())
+  committeeId String
+  committee   Committee @relation(fields: [committeeId], references: [id])
   title       String
   description String?
   startAt     DateTime
@@ -129,6 +132,7 @@ model Event {
   updatedAt   DateTime  @updatedAt
 
   @@index([startAt])
+  @@index([committeeId])
 }
 
 model AuditLog {
