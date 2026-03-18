@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -444,9 +444,10 @@ export default function CommitteeDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
-  const canManageEvents =
-    viewerInfo.isAdmin ||
-    (session?.user?.roles?.includes('calendar') && viewerInfo.isMember);
+  const canManageEvents = useMemo(
+    () => viewerInfo.isAdmin || (session?.user?.roles?.includes('calendar') === true && viewerInfo.isMember),
+    [viewerInfo.isAdmin, viewerInfo.isMember, session?.user?.roles]
+  );
 
   const fetchCommittee = useCallback(async () => {
     if (!committeeId) return;
