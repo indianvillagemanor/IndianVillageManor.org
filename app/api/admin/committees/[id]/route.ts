@@ -143,7 +143,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     where: { id },
     include: {
       _count: {
-        select: { documents: true },
+        select: { documents: { where: { deleted: false } } },
       },
     },
   });
