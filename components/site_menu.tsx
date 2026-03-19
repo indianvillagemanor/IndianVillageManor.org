@@ -238,8 +238,8 @@ const SiteMenu = () => {
                 </Link>
               </li>
 
-              {/* Newsletter link — visible to all users when published newsletters exist */}
-              {hasNewsletters && (
+              {/* Newsletter link — visible to logged-in users when published newsletters exist */}
+              {session && hasNewsletters && (
                 <li style={{ padding: 0 }}>
                   <Link
                     href="/newsletters"
