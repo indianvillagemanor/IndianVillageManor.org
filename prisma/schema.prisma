@@ -79,9 +79,12 @@ model Committee {
   name                 String
   description          String?
   hasNewsletterFeature Boolean    @default(false)
+  archived             Boolean    @default(false)
   members              User[]     @relation("Memberships")
   documents            Document[]
   events               Event[]
+
+  @@index([archived])
 }
 
 model Document {

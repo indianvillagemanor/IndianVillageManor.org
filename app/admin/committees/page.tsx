@@ -10,8 +10,10 @@ interface CommitteeItem {
   name: string;
   description: string | null;
   hasNewsletterFeature: boolean;
+  archived: boolean;
   memberCount: number;
   documentCount: number;
+  eventCount: number;
 }
 
 const pageStyle: React.CSSProperties = {
@@ -126,6 +128,12 @@ const newsletterBadgeStyle: React.CSSProperties = {
   ...badgeStyle,
   backgroundColor: '#fef3c7',
   color: '#92400e',
+};
+
+const archivedBadgeStyle: React.CSSProperties = {
+  ...badgeStyle,
+  backgroundColor: '#f3f4f6',
+  color: '#6b7280',
 };
 
 const manageLinkStyle: React.CSSProperties = {
@@ -247,9 +255,19 @@ export default function AdminCommitteesPage() {
             {committees.length} committee{committees.length !== 1 ? 's' : ''}
           </p>
           {committees.map(committee => (
-            <div key={committee.id} style={cardStyle}>
+            <div key={committee.id} style={{
+              ...cardStyle,
+              ...(committee.archived ? { backgroundColor: '#f9fafb', borderColor: '#e5e7eb', opacity: 0.85 } : {}),
+            }}>
               <div style={cardHeaderStyle}>
-                <div style={cardNameStyle}>{committee.name}</div>
+                <div>
+                  <div style={cardNameStyle}>{committee.name}</div>
+                  {committee.archived && (
+                    <span style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: '500' }}>
+                      Archived — hidden from regular users
+                    </span>
+                  )}
+                </div>
                 <Link
                   href={`/admin/committees/${committee.id}`}
                   style={manageLinkStyle}
@@ -269,9 +287,19 @@ export default function AdminCommitteesPage() {
                 <span style={docBadgeStyle}>
                   {committee.documentCount} document{committee.documentCount !== 1 ? 's' : ''}
                 </span>
+                {committee.eventCount > 0 && (
+                  <span style={{ ...badgeStyle, backgroundColor: '#ede9fe', color: '#5b21b6' }}>
+                    {committee.eventCount} event{committee.eventCount !== 1 ? 's' : ''}
+                  </span>
+                )}
                 {committee.hasNewsletterFeature && (
                   <span style={newsletterBadgeStyle}>
                     📰 Newsletter
+                  </span>
+                )}
+                {committee.archived && (
+                  <span style={archivedBadgeStyle}>
+                    📦 Archived
                   </span>
                 )}
               </div>

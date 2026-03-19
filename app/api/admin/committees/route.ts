@@ -29,6 +29,7 @@ export async function GET() {
           documents: {
             where: { deleted: false },
           },
+          events: true,
         },
       },
     },
@@ -40,8 +41,10 @@ export async function GET() {
     name: c.name,
     description: c.description,
     hasNewsletterFeature: c.hasNewsletterFeature,
+    archived: c.archived,
     memberCount: c._count.members,
     documentCount: c._count.documents,
+    eventCount: c._count.events,
   }));
 
   return NextResponse.json({ committees: result });
