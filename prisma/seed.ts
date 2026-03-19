@@ -118,7 +118,21 @@ async function main() {
   }
   console.log(`✓ Created ${systemConfigs.length} SystemConfig entries`);
 
-  // 4. Create EmailTemplate defaults
+  // 4. Ensure Communications committee exists
+  console.log('Ensuring Communications committee exists...');
+  await prisma.committee.upsert({
+    where: { id: 'communications' },
+    update: {},
+    create: {
+      id: 'communications',
+      name: 'Communications',
+      description: 'Community communications and announcements',
+      hasNewsletterFeature: false,
+    },
+  });
+  console.log('✓ Communications committee ensured');
+
+  // 5. Create EmailTemplate defaults
   console.log('Creating EmailTemplate defaults...');
   const emailTemplates = [
     {

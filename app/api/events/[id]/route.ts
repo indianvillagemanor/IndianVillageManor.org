@@ -13,6 +13,7 @@ export async function GET(
 
   const event = await prisma.event.findUnique({
     where: { id },
+    include: { committee: { select: { id: true, name: true } } },
   });
 
   if (!event) {
@@ -28,11 +29,13 @@ export async function GET(
       endAt: event.endAt?.toISOString() || null,
       createdAt: event.createdAt.toISOString(),
       createdBy: event.createdBy,
+      committeeId: event.committee.id,
+      committeeName: event.committee.name,
     },
   });
 }
 
-// PUT: Update an event (calendar role or dbadmin required)
+// PUT: Update an event (calendar role + committee member, or dbadmin)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -44,16 +47,32 @@ export async function PUT(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const roles = session.user.roles || [];
-  const canManageEvents = roles.includes('calendar') || roles.includes('dbadmin');
-
-  if (!canManageEvents) {
-    return NextResponse.json({ error: 'Forbidden: calendar role required' }, { status: 403 });
-  }
-
   const existing = await prisma.event.findUnique({ where: { id } });
   if (!existing) {
     return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      roles: { select: { name: true } },
+      committees: { select: { id: true } },
+    },
+  });
+
+  if (!user || user.verificationStatus !== 'verified') {
+    return NextResponse.json({ error: 'Forbidden: verified status required' }, { status: 403 });
+  }
+
+  const isAdmin = user.roles.some(r => r.name === 'dbadmin');
+  const hasCalendarRole = user.roles.some(r => r.name === 'calendar');
+  const isMember = user.committees.some(c => c.id === existing.committeeId);
+
+  if (!isAdmin && !(hasCalendarRole && isMember)) {
+    return NextResponse.json(
+      { error: 'Forbidden: calendar role and committee membership required' },
+      { status: 403 }
+    );
   }
 
   let body: { title?: string; description?: string; startAt?: string; endAt?: string };
@@ -65,7 +84,6 @@ export async function PUT(
 
   const { title, description, startAt, endAt } = body;
 
-  // Validate required fields
   if (!title || typeof title !== 'string' || title.trim() === '') {
     return NextResponse.json({ error: 'Title is required' }, { status: 400 });
   }
@@ -103,7 +121,7 @@ export async function PUT(
     action: 'event_updated',
     entityType: 'Event',
     entityId: event.id,
-    details: { title: event.title, startAt: event.startAt.toISOString() },
+    details: { title: event.title, startAt: event.startAt.toISOString(), committeeId: event.committeeId },
     ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
     userAgent: request.headers.get('user-agent') || undefined,
     success: true,
@@ -121,7 +139,7 @@ export async function PUT(
   });
 }
 
-// DELETE: Delete an event (calendar role or dbadmin required)
+// DELETE: Delete an event (calendar role + committee member, or dbadmin)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -133,16 +151,32 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const roles = session.user.roles || [];
-  const canManageEvents = roles.includes('calendar') || roles.includes('dbadmin');
-
-  if (!canManageEvents) {
-    return NextResponse.json({ error: 'Forbidden: calendar role required' }, { status: 403 });
-  }
-
   const existing = await prisma.event.findUnique({ where: { id } });
   if (!existing) {
     return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      roles: { select: { name: true } },
+      committees: { select: { id: true } },
+    },
+  });
+
+  if (!user || user.verificationStatus !== 'verified') {
+    return NextResponse.json({ error: 'Forbidden: verified status required' }, { status: 403 });
+  }
+
+  const isAdmin = user.roles.some(r => r.name === 'dbadmin');
+  const hasCalendarRole = user.roles.some(r => r.name === 'calendar');
+  const isMember = user.committees.some(c => c.id === existing.committeeId);
+
+  if (!isAdmin && !(hasCalendarRole && isMember)) {
+    return NextResponse.json(
+      { error: 'Forbidden: calendar role and committee membership required' },
+      { status: 403 }
+    );
   }
 
   await prisma.event.delete({ where: { id } });
@@ -152,7 +186,7 @@ export async function DELETE(
     action: 'event_deleted',
     entityType: 'Event',
     entityId: id,
-    details: { title: existing.title, startAt: existing.startAt.toISOString() },
+    details: { title: existing.title, startAt: existing.startAt.toISOString(), committeeId: existing.committeeId },
     ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
     userAgent: request.headers.get('user-agent') || undefined,
     success: true,
