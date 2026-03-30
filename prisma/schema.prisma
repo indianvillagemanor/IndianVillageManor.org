@@ -95,6 +95,8 @@ model Document {
   deleted       Boolean            @default(false)
   isNewsletter  Boolean            @default(false)
   thumbnailPath String?            // relative path to first-page thumbnail image
+  isPublic      Boolean            @default(false)
+  publicSlug    String?            @unique // short title-derived slug for unauthenticated access
   uploadedBy    String             // User.id reference
   uploadedAt    DateTime           @default(now())
   deletedBy     String?            // User.id reference
@@ -106,6 +108,7 @@ model Document {
   @@index([archived])
   @@index([deleted])
   @@index([isNewsletter])
+  @@index([isPublic])
 }
 
 model DocumentDownload {

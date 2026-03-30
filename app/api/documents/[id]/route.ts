@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { logAuditEvent } from '@/lib/audit';
 import { generatePdfThumbnail, deletePdfThumbnail } from '@/lib/pdf-thumbnail';
+import { generatePublicSlug } from '@/lib/public-slug';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -85,10 +86,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     action !== 'archive' &&
     action !== 'set_newsletter' &&
     action !== 'unset_newsletter' &&
+    action !== 'set_public' &&
+    action !== 'unset_public' &&
     action !== 'rename'
   ) {
     return NextResponse.json(
-      { error: 'action must be "publish", "archive", "set_newsletter", "unset_newsletter", or "rename"' },
+      { error: 'action must be "publish", "archive", "set_newsletter", "unset_newsletter", "set_public", "unset_public", or "rename"' },
       { status: 400 }
     );
   }
@@ -201,6 +204,71 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       await logAuditEvent({
         userId: session.user.id,
         action: 'document_newsletter_unset',
+        entityType: 'Document',
+        entityId: documentId,
+        success: true,
+        details: { committeeId: document.committeeId, title: document.title },
+        ipAddress:
+          request.headers.get('x-forwarded-for') ||
+          request.headers.get('x-real-ip') ||
+          'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+      });
+
+      return NextResponse.json({ document: updated });
+    }
+  }
+
+  // Handle public toggle
+  if (action === 'set_public' || action === 'unset_public') {
+    if (action === 'set_public') {
+      // Reuse existing slug if one was already generated (stable URL)
+      let slug = document.publicSlug;
+      if (!slug) {
+        // Generate and ensure uniqueness (retry once on collision)
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const candidate = generatePublicSlug(document.title, document.filename);
+          const existing = await prisma.document.findUnique({ where: { publicSlug: candidate } });
+          if (!existing) {
+            slug = candidate;
+            break;
+          }
+        }
+        if (!slug) {
+          return NextResponse.json({ error: 'Could not generate a unique slug; please try again' }, { status: 500 });
+        }
+      }
+
+      const updated = await prisma.document.update({
+        where: { id: documentId },
+        data: { isPublic: true, publicSlug: slug },
+      });
+
+      await logAuditEvent({
+        userId: session.user.id,
+        action: 'document_set_public',
+        entityType: 'Document',
+        entityId: documentId,
+        success: true,
+        details: { committeeId: document.committeeId, title: document.title, publicSlug: slug },
+        ipAddress:
+          request.headers.get('x-forwarded-for') ||
+          request.headers.get('x-real-ip') ||
+          'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+      });
+
+      return NextResponse.json({ document: updated });
+    } else {
+      // unset_public: clear the flag but keep the slug so the URL stays stable if re-enabled
+      const updated = await prisma.document.update({
+        where: { id: documentId },
+        data: { isPublic: false },
+      });
+
+      await logAuditEvent({
+        userId: session.user.id,
+        action: 'document_unset_public',
         entityType: 'Document',
         entityId: documentId,
         success: true,

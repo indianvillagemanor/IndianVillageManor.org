@@ -29,10 +29,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Document not found' }, { status: 404 });
   }
 
-  // Published newsletters are publicly accessible (no auth required)
+  // Published newsletters and explicitly public documents are accessible without auth
   const isPublicNewsletter = document.isNewsletter && document.published;
+  const isPublicDocument = document.isPublic && document.published;
 
-  if (!isPublicNewsletter) {
+  if (!isPublicNewsletter && !isPublicDocument) {
     // All other documents require authentication
     const session = await getServerSession(authOptions);
 
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const filename = normalizeDownloadFilename(path.basename(document.filename));
   const encodedFilename = encodeURIComponent(filename);
 
-  const cacheControl = isPublicNewsletter
+  const cacheControl = (isPublicNewsletter || isPublicDocument)
     ? 'public, max-age=86400'
     : 'private, no-store';
 

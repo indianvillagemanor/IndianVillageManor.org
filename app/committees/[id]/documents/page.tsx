@@ -14,6 +14,8 @@ interface DocumentItem {
   deleted: boolean;
   isNewsletter: boolean;
   thumbnailPath: string | null;
+  isPublic: boolean;
+  publicSlug: string | null;
   uploadedAt: string;
   uploadedBy: string;
   deletedAt: string | null;
@@ -183,6 +185,12 @@ const newsletterBadge: React.CSSProperties = {
   ...badgeBase,
   backgroundColor: '#dbeafe',
   color: '#1e40af',
+};
+
+const publicBadge: React.CSSProperties = {
+  ...badgeBase,
+  backgroundColor: '#fef3c7',
+  color: '#92400e',
 };
 
 const actionButtonStyle: React.CSSProperties = {
@@ -478,7 +486,7 @@ export default function DocumentsManagePage() {
 
   const handleAction = async (
     docId: string,
-    action: 'publish' | 'archive' | 'delete' | 'restore' | 'permanent' | 'set_newsletter' | 'unset_newsletter'
+    action: 'publish' | 'archive' | 'delete' | 'restore' | 'permanent' | 'set_newsletter' | 'unset_newsletter' | 'set_public' | 'unset_public'
   ) => {
     setProcessing(docId + action);
     setError('');
@@ -487,7 +495,7 @@ export default function DocumentsManagePage() {
     try {
       let res: Response;
 
-      if (action === 'publish' || action === 'archive' || action === 'set_newsletter' || action === 'unset_newsletter') {
+      if (action === 'publish' || action === 'archive' || action === 'set_newsletter' || action === 'unset_newsletter' || action === 'set_public' || action === 'unset_public') {
         res = await fetch(`/api/documents/${docId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -523,6 +531,8 @@ export default function DocumentsManagePage() {
         permanent: 'permanently deleted',
         set_newsletter: 'marked as newsletter',
         unset_newsletter: 'unmarked as newsletter',
+        set_public: 'made publicly accessible',
+        unset_public: 'made private',
       };
       setSuccess(`Document ${actionLabels[action]} successfully.`);
       const docs = await fetchDocuments();
@@ -659,7 +669,9 @@ export default function DocumentsManagePage() {
               processing === doc.id + 'archive' ||
               processing === doc.id + 'delete' ||
               processing === doc.id + 'set_newsletter' ||
-              processing === doc.id + 'unset_newsletter';
+              processing === doc.id + 'unset_newsletter' ||
+              processing === doc.id + 'set_public' ||
+              processing === doc.id + 'unset_public';
             const isRenaming = renamingDocId === doc.id;
             const anyBusy = isProcessing || (isRenaming && renameProcessing);
             const canBeNewsletter = isPdf(doc.filename);
@@ -744,7 +756,21 @@ export default function DocumentsManagePage() {
                     <div style={{ marginTop: '6px' }}>
                       {getStatusBadge(doc)}
                       {doc.isNewsletter && <span style={newsletterBadge}>Newsletter</span>}
+                      {doc.isPublic && <span style={publicBadge}>Public</span>}
                     </div>
+                    {doc.isPublic && doc.publicSlug && (
+                      <div style={{ marginTop: '4px', fontSize: '0.80rem', color: '#92400e' }}>
+                        Public URL:{' '}
+                        <a
+                          href={`/api/d/${doc.publicSlug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#92400e', fontFamily: 'monospace' }}
+                        >
+                          /api/d/{doc.publicSlug}
+                        </a>
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     {/* Download link */}
@@ -788,6 +814,29 @@ export default function DocumentsManagePage() {
                           title="Mark as newsletter (generates thumbnail)"
                         >
                           Mark as Newsletter
+                        </button>
+                      )
+                    )}
+
+                    {/* Public toggle — only for published documents */}
+                    {doc.published && (
+                      doc.isPublic ? (
+                        <button
+                          style={{ ...actionButtonStyle, color: '#92400e', borderColor: '#fcd34d', ...(anyBusy ? disabledButtonStyle : {}) }}
+                          onClick={() => handleAction(doc.id, 'unset_public')}
+                          disabled={anyBusy}
+                          title="Revoke public access (URL will stop working)"
+                        >
+                          Revoke Public
+                        </button>
+                      ) : (
+                        <button
+                          style={{ ...actionButtonStyle, color: '#92400e', borderColor: '#fcd34d', ...(anyBusy ? disabledButtonStyle : {}) }}
+                          onClick={() => handleAction(doc.id, 'set_public')}
+                          disabled={anyBusy}
+                          title="Make publicly accessible via short URL (no login required)"
+                        >
+                          Make Public
                         </button>
                       )
                     )}
