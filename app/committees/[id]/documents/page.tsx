@@ -765,7 +765,7 @@ export default function DocumentsManagePage() {
                           href={`/api/d/${doc.publicSlug}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: '#92400e', fontFamily: 'monospace' }}
+                          style={{ color: '#92400e', fontFamily: 'monospace', whiteSpace: 'nowrap' }}
                         >
                           /api/d/{doc.publicSlug}
                         </a>
