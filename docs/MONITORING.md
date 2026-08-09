@@ -26,21 +26,37 @@ Two properties follow from that, and they shape everything below:
 ## Layer 1: external uptime and certificate monitoring
 
 The first line of defence, and the one to set up first. A third-party service
-polls the public URL and alerts on both outage and impending certificate
-expiry. This requires no code, runs off-host, and would have caught the expiry
-30 days early on its own.
+polls the public URL and alerts when it stops answering. This requires no code
+and runs off-host, so it reports outages the server itself cannot.
 
-Any of UptimeRobot (free tier includes SSL expiry alerts at 30/14/7 days),
-Better Stack, or Pingdom will do. Configure:
+UptimeRobot is what is deployed; Better Stack and Pingdom are equivalent.
+Configure:
 
 | Setting | Value |
 | --- | --- |
-| Monitor type | HTTPS keyword |
+| Monitor type | **Keyword** (a distinct type in the dropdown, not an option on an HTTP(s) monitor) |
 | URL | `https://indianvillagemanor.org/api/health` |
-| Keyword | `"status":"ok"` |
+| Keyword | `"status":"ok"` — the whole string including quotes; substring match, whitespace-exact |
+| Alert when | Keyword **does not exist** |
 | Interval | 5 minutes |
-| SSL expiry alerts | Enabled, 30 / 14 / 7 days |
 | Alert contacts | At least two people, at least one by SMS |
+
+The keyword field only appears after switching the type dropdown from `HTTP(s)`
+to `Keyword`; there is no separate field for a value, because the match is a
+plain substring against the response body.
+
+**As of August 2026, SSL expiry alerting appears to have moved to UptimeRobot's
+paid tiers**, though their pricing page still lists it under Free — verify
+against your own dashboard rather than their marketing pages. This does not
+leave you exposed: UptimeRobot validates TLS on ordinary checks, so an expired
+certificate fails the check and raises a normal down alert. What the paid
+feature adds is *advance* warning, which Layer 2 below provides for free. If
+advance warning through this provider matters to you, Better Stack and Notifier
+both include SSL monitoring on their free tiers.
+
+Run **two** monitors, not one. A plain HTTP(s) monitor catches TLS failures and
+connection errors; the keyword monitor catches a healthy-looking 200 served
+while Postgres is down. Neither subsumes the other.
 
 Point the check at `/api/health` rather than `/`. That endpoint verifies
 database connectivity, so a keyword match on `"status":"ok"` catches a Postgres

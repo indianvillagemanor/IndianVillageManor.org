@@ -271,6 +271,15 @@ curl -s "http://$HOSTNAME/.well-known/acme-challenge/probe"
 sudo rm /var/www/certbot/.well-known/acme-challenge/probe
 ```
 
+**Test with `curl` over explicit `http://`, not a browser.** The site sends
+HSTS with `includeSubDomains`, so any browser that has visited before will
+rewrite the URL to `https://` before the request leaves — and over HTTPS this
+path is proxied to Next.js, which correctly returns 404. A 404 in a browser
+therefore proves nothing. The ACME block is deliberately port-80 only, because
+HTTP-01 validation always begins over plain HTTP; putting it on 443 would make
+renewal depend on the certificate being valid, which is the trap that made the
+2026 outage unrecoverable without stopping nginx.
+
 Only once that returns `200`/`ok`, rewrite the stored authenticator by
 reissuing with `--webroot`:
 
@@ -278,11 +287,32 @@ reissuing with `--webroot`:
 sudo certbot certonly --webroot -w /var/www/certbot \
   --cert-name "$HOSTNAME" \
   -d "$HOSTNAME" -d "www.$HOSTNAME" \
-  --non-interactive
+  --force-renewal --non-interactive
 
 # Confirm the change stuck
-grep authenticator "/etc/letsencrypt/renewal/$HOSTNAME.conf"   # -> authenticator = webroot
+grep -E 'authenticator|webroot' "/etc/letsencrypt/renewal/$HOSTNAME.conf"
+# -> authenticator = webroot
+# -> webroot_path = /var/www/certbot,
+# -> [[webroot_map]]
 ```
+
+`--force-renewal` is **required here, not optional.** Without it, certbot sees
+an existing certificate covering the same names that is not yet within its
+30-day renewal window, reports "not yet due for renewal", exits 0 — and leaves
+the stored authenticator unchanged. You get a success message and no fix. Since
+this section exists precisely to change the authenticator, force the issuance so
+the renewal config is actually rewritten.
+
+Forcing also verifies the whole chain at a moment when it is safe to fail: it
+performs a real webroot validation against the production ACME server, and fires
+the deploy hook from section 8.3 so the nginx reload path is exercised while the
+current certificate is still valid. If validation fails, certbot exits non-zero
+and leaves the existing certificate in place — the site is unaffected.
+
+Let's Encrypt permits 5 duplicate certificates per week for the same set of
+names, so budget accordingly if you are iterating. `certbot renew --dry-run`
+(section 8.5) uses the staging server and does not count against that limit,
+which is why it is the right tool for repeated verification.
 
 `certbot renew` reads the authenticator from that renewal config file, so this
 one command is what makes every future automatic renewal work.
@@ -301,6 +331,34 @@ sudo install -m 0755 \
 
 The hook assumes the compose file is at `/opt/ivm/docker-compose.prod.yml`;
 set `IVM_COMPOSE_FILE` in the environment if it is elsewhere.
+
+When the hook runs, certbot prints its stderr under the heading **"Hook
+'deploy-hook' ran with error output"**. This is normal and does not indicate a
+failure: `nginx -t` writes its results to stderr even when the configuration is
+valid. Successful output looks like this —
+
+```text
+Hook 'deploy-hook' ran with output:
+ [reload-nginx] nginx reloaded; now serving /etc/letsencrypt/live/<host>
+Hook 'deploy-hook' ran with error output:
+ nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+ nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
+The reliable check is not the absence of that heading but whether the serial of
+the *served* certificate changed:
+
+```bash
+echo | openssl s_client -servername "$HOSTNAME" -connect "$HOSTNAME:443" 2>/dev/null \
+  | openssl x509 -noout -serial -dates
+```
+
+Compare against `sudo certbot certificates`. Matching serials mean nginx
+reloaded; differing serials mean the hook did not take effect.
+
+Note that Let's Encrypt backdates `notBefore` by about an hour to tolerate
+clock skew, so a certificate issued at 20:07 shows `notBefore` near 19:08. That
+is not a sign anything went wrong.
 
 ### 8.4 Monitoring (see also `docs/MONITORING.md`)
 
