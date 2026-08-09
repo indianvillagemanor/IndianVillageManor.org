@@ -4,7 +4,20 @@ upstream nextjs {
 
 server {
     listen 80;
-    server_name ${NGINX_HOST};
+    server_name ${NGINX_HOST} www.${NGINX_HOST};
+
+    # ACME HTTP-01 challenge. MUST stay above the catch-all redirect below,
+    # otherwise `location /` swallows the challenge, proxies it to Next.js,
+    # and renewal fails with a 404. Served over plain HTTP on purpose so that
+    # renewal never depends on the current certificate being valid.
+    #
+    # certbot --webroot writes into /var/www/certbot on the host; that path is
+    # bind-mounted read-only into this container by docker-compose.prod.yml.
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        default_type "text/plain";
+        try_files $uri =404;
+    }
 
     # Keep health endpoint on HTTP for container health checks
     location /nginx-health {
@@ -14,7 +27,7 @@ server {
     }
 
     location / {
-        return 301 https://$host$request_uri;
+        return 301 https://${NGINX_HOST}$request_uri;
     }
 }
 
@@ -51,4 +64,25 @@ server {
         proxy_read_timeout 86400;
     }
 
+}
+
+# Canonical-host redirect: www -> apex.
+#
+# The certificate covers both names, so TLS completes here before redirecting.
+# Serving the app on both names would break NextAuth, whose callback URLs are
+# absolute and derived from NEXTAUTH_URL (the apex): a login started on www
+# would redirect to the apex and lose its session cookie. Redirecting keeps a
+# single canonical origin.
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name www.${NGINX_HOST};
+
+    ssl_certificate /etc/letsencrypt/live/${NGINX_HOST}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${NGINX_HOST}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+
+    return 301 https://${NGINX_HOST}$request_uri;
 }
