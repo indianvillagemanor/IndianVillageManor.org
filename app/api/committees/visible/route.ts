@@ -43,8 +43,9 @@ export async function GET() {
 
     // Build visibility query
     const whereClause = isAdmin
-      ? {} // admins see all committees
+      ? {} // admins see all committees (including archived)
       : {
+          archived: false,
           OR: [
             // Committees with published documents (visible to all verified users)
             {

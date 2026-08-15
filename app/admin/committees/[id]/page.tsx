@@ -27,8 +27,15 @@ interface CommitteeDetail {
   name: string;
   description: string | null;
   hasNewsletterFeature: boolean;
+  archived: boolean;
   members: CommitteeMember[];
   documents: CommitteeDocument[];
+  _count?: { events: number };
+}
+
+interface OtherCommittee {
+  id: string;
+  name: string;
 }
 
 interface VerifiedUser {
@@ -37,6 +44,12 @@ interface VerifiedUser {
   lastName: string;
   email: string;
   unitNumber: string;
+}
+
+// ---- Helpers ----
+
+function pluralize(count: number, singular: string): string {
+  return `${count} ${singular}${count !== 1 ? 's' : ''}`;
 }
 
 // ---- Styles ----
@@ -139,6 +152,22 @@ const cancelLinkStyle: React.CSSProperties = {
   display: 'inline-block',
 };
 
+const archiveButtonStyle: React.CSSProperties = {
+  padding: '10px 20px',
+  backgroundColor: '#92400e',
+  color: '#fff',
+  border: 'none',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  fontWeight: 'bold',
+  fontSize: '0.95rem',
+};
+
+const unarchiveButtonStyle: React.CSSProperties = {
+  ...archiveButtonStyle,
+  backgroundColor: '#1d4ed8',
+};
+
 const deleteButtonStyle: React.CSSProperties = {
   padding: '10px 20px',
   backgroundColor: '#b91c1c',
@@ -234,6 +263,124 @@ const emptyStyle: React.CSSProperties = {
   fontStyle: 'italic',
 };
 
+const archivedBannerStyle: React.CSSProperties = {
+  padding: '12px 16px',
+  backgroundColor: '#fef3c7',
+  color: '#92400e',
+  border: '1px solid #fde68a',
+  borderRadius: '8px',
+  marginBottom: '20px',
+  fontWeight: '600',
+  fontSize: '0.95rem',
+};
+
+// ---- Transfer/Delete Modal ----
+
+interface DeleteModalProps {
+  committeeName: string;
+  documentCount: number;
+  eventCount: number;
+  otherCommittees: OtherCommittee[];
+  onConfirm: (transferToId: string | null) => void;
+  onCancel: () => void;
+  loading: boolean;
+}
+
+function DeleteModal({ committeeName, documentCount, eventCount, otherCommittees, onConfirm, onCancel, loading }: DeleteModalProps) {
+  const [transferToId, setTransferToId] = useState('');
+
+  const overlayStyle: React.CSSProperties = {
+    position: 'fixed',
+    inset: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    padding: '16px',
+  };
+
+  const dialogStyle: React.CSSProperties = {
+    backgroundColor: '#fff',
+    borderRadius: '10px',
+    padding: '28px 24px',
+    maxWidth: '520px',
+    width: '100%',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+  };
+
+  const assetList: string[] = [];
+  if (documentCount > 0) assetList.push(pluralize(documentCount, 'document'));
+  if (eventCount > 0) assetList.push(pluralize(eventCount, 'calendar event'));
+
+  return (
+    <div style={overlayStyle}>
+      <div style={dialogStyle}>
+        <h2 style={{ margin: '0 0 12px 0', fontSize: '1.2rem', color: '#b91c1c' }}>
+          Delete &ldquo;{committeeName}&rdquo;
+        </h2>
+
+        <p style={{ color: '#555', marginBottom: '16px', lineHeight: '1.6' }}>
+          This committee has {assetList.join(' and ')}. You must transfer them to another
+          committee before deleting, or delete them individually first.
+        </p>
+
+        {otherCommittees.length > 0 ? (
+          <>
+            <label style={{ ...labelStyle, marginBottom: '8px' }}>
+              Transfer all assets to:
+            </label>
+            <select
+              style={{ ...selectStyle, width: '100%', marginBottom: '20px' }}
+              value={transferToId}
+              onChange={e => setTransferToId(e.target.value)}
+              disabled={loading}
+            >
+              <option value="">— select a committee —</option>
+              {otherCommittees.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </>
+        ) : (
+          <p style={{ color: '#b91c1c', marginBottom: '20px', fontSize: '0.92rem' }}>
+            There are no other committees to transfer assets to. Please delete all documents
+            and events manually before deleting this committee.
+          </p>
+        )}
+
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <button
+            style={{ padding: '9px 18px', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', background: '#fff', color: '#555', fontWeight: '500' }}
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          {otherCommittees.length > 0 && (
+            <button
+              style={{
+                padding: '9px 18px',
+                backgroundColor: '#b91c1c',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                ...((!transferToId || loading) ? disabledButtonStyle : {}),
+              }}
+              onClick={() => onConfirm(transferToId || null)}
+              disabled={!transferToId || loading}
+            >
+              {loading ? 'Transferring & Deleting...' : 'Transfer & Delete'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---- Component ----
 
 export default function AdminCommitteePage() {
@@ -249,13 +396,17 @@ export default function AdminCommitteePage() {
   const [description, setDescription] = useState('');
   const [hasNewsletterFeature, setHasNewsletterFeature] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [archiving, setArchiving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [memberAction, setMemberAction] = useState<string | null>(null);
   const [allVerifiedUsers, setAllVerifiedUsers] = useState<VerifiedUser[]>([]);
+  const [allCommittees, setAllCommittees] = useState<OtherCommittee[]>([]);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(!isNew);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteAssetCounts, setDeleteAssetCounts] = useState<{ documentCount: number; eventCount: number } | null>(null);
 
   const fetchCommittee = useCallback(async () => {
     if (!committeeId) return;
@@ -291,6 +442,18 @@ export default function AdminCommitteePage() {
     }
   }, []);
 
+  const fetchAllCommittees = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/committees');
+      if (res.ok) {
+        const data = await res.json();
+        setAllCommittees((data.committees || []).filter((c: OtherCommittee & { id: string }) => c.id !== committeeId));
+      }
+    } catch {
+      // Non-critical
+    }
+  }, [committeeId]);
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/login');
@@ -303,12 +466,13 @@ export default function AdminCommitteePage() {
       }
       if (committeeId) {
         fetchCommittee();
+        fetchAllCommittees();
       } else {
         setLoading(false);
       }
       fetchVerifiedUsers();
     }
-  }, [status, session, router, committeeId, fetchCommittee, fetchVerifiedUsers]);
+  }, [status, session, router, committeeId, fetchCommittee, fetchVerifiedUsers, fetchAllCommittees]);
 
   const handleSave = async () => {
     setError('');
@@ -350,22 +514,103 @@ export default function AdminCommitteePage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!committeeId) return;
-    if (!confirm(`Are you sure you want to delete "${committee?.name}"? This action cannot be undone.`)) return;
+  const handleArchiveToggle = async () => {
+    if (!committeeId || !committee) return;
+    const newArchived = !committee.archived;
+    const confirmMessage = newArchived
+      ? `Archive "${committee.name}"? It will be hidden from regular users but can be unarchived later.`
+      : `Unarchive "${committee.name}"? It will become visible to regular users again.`;
+    if (!confirm(confirmMessage)) return;
 
-    setDeleting(true);
+    setArchiving(true);
     setError('');
+    setSuccess('');
     try {
+      const res = await fetch(`/api/admin/committees/${committeeId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: committee.name,
+          description: committee.description,
+          hasNewsletterFeature: committee.hasNewsletterFeature,
+          archived: newArchived,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Failed to update committee');
+        return;
+      }
+      setCommittee(prev => prev ? { ...prev, archived: data.committee.archived } : prev);
+      setSuccess(newArchived ? 'Committee archived successfully.' : 'Committee unarchived successfully.');
+    } catch {
+      setError('Failed to update committee. Please try again.');
+    } finally {
+      setArchiving(false);
+    }
+  };
+
+  const handleDeleteClick = async () => {
+    if (!committeeId || !committee) return;
+
+    // Always confirm before sending any DELETE request
+    if (!confirm(`Are you sure you want to permanently delete "${committee.name}"? This action cannot be undone.`)) return;
+
+    setError('');
+    setDeleting(true);
+    try {
+      // Probe: send DELETE without a transfer target.
+      // If the committee has documents or events the server returns 409 with counts,
+      // and we show the transfer modal. Otherwise the committee is deleted immediately.
       const res = await fetch(`/api/admin/committees/${committeeId}`, { method: 'DELETE' });
       const data = await res.json();
+
+      if (res.status === 409) {
+        // Has blocking assets – show transfer modal
+        setDeleteAssetCounts({ documentCount: data.documentCount, eventCount: data.eventCount });
+        setShowDeleteModal(true);
+        return;
+      }
+
       if (!res.ok) {
         setError(data.error || 'Failed to delete committee');
         return;
       }
+
+      // No assets – committee deleted successfully
       router.push('/admin/committees');
     } catch {
       setError('Failed to delete committee. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Called when user selects a target and clicks "Transfer & Delete" in the modal
+  const handleDeleteConfirm = async (transferToId: string | null) => {
+    if (!committeeId || !committee) return;
+
+    // The modal itself is the confirmation UI – no additional browser confirm() needed
+    setDeleting(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/admin/committees/${committeeId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transferToId ? { transferToCommitteeId: transferToId } : {}),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Failed to delete committee');
+        setShowDeleteModal(false);
+        return;
+      }
+
+      router.push('/admin/committees');
+    } catch {
+      setError('Failed to delete committee. Please try again.');
+      setShowDeleteModal(false);
     } finally {
       setDeleting(false);
     }
@@ -434,10 +679,23 @@ export default function AdminCommitteePage() {
   // Users not already members (for add dropdown)
   const memberIds = new Set((committee?.members || []).map(m => m.id));
   const availableUsers = allVerifiedUsers.filter(u => !memberIds.has(u.id));
-  const hasDocuments = (committee?.documents || []).length > 0;
+  const eventCount = committee?._count?.events ?? 0;
+  const documentCount = (committee?.documents || []).length;
 
   return (
     <div style={pageStyle}>
+      {showDeleteModal && deleteAssetCounts && committee && (
+        <DeleteModal
+          committeeName={committee.name}
+          documentCount={deleteAssetCounts.documentCount}
+          eventCount={deleteAssetCounts.eventCount}
+          otherCommittees={allCommittees}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => { setShowDeleteModal(false); setDeleting(false); }}
+          loading={deleting}
+        />
+      )}
+
       <Link href="/admin/committees" style={backLinkStyle}>
         &larr; Back to Committee Management
       </Link>
@@ -448,6 +706,12 @@ export default function AdminCommitteePage() {
       <p style={subheadingStyle}>
         {isNew ? 'Create a new community committee.' : 'Update committee details and manage members.'}
       </p>
+
+      {committee?.archived && (
+        <div style={archivedBannerStyle}>
+          ⚠️ This committee is archived and hidden from regular users.
+        </div>
+      )}
 
       {error && <div style={errorStyle}>{error}</div>}
       {success && <div style={successStyle}>{success}</div>}
@@ -513,22 +777,34 @@ export default function AdminCommitteePage() {
             Cancel
           </Link>
           {!isNew && (
-            <button
-              style={{
-                ...deleteButtonStyle,
-                ...(hasDocuments || deleting ? disabledButtonStyle : {}),
-              }}
-              onClick={handleDelete}
-              disabled={hasDocuments || deleting}
-              title={hasDocuments ? 'Cannot delete committee with documents' : 'Delete this committee'}
-            >
-              {deleting ? 'Deleting...' : 'Delete Committee'}
-            </button>
+            <>
+              <button
+                style={{ ...(committee?.archived ? unarchiveButtonStyle : archiveButtonStyle), ...(archiving ? disabledButtonStyle : {}) }}
+                onClick={handleArchiveToggle}
+                disabled={archiving}
+                title={committee?.archived ? 'Unarchive this committee' : 'Archive this committee'}
+              >
+                {archiving
+                  ? (committee?.archived ? 'Unarchiving...' : 'Archiving...')
+                  : (committee?.archived ? 'Unarchive' : 'Archive')}
+              </button>
+              <button
+                style={{ ...deleteButtonStyle, ...(deleting ? disabledButtonStyle : {}) }}
+                onClick={handleDeleteClick}
+                disabled={deleting}
+                title="Delete this committee"
+              >
+                {deleting ? 'Deleting...' : 'Delete Committee'}
+              </button>
+            </>
           )}
         </div>
-        {!isNew && hasDocuments && (
+        {!isNew && (documentCount > 0 || eventCount > 0) && (
           <p style={{ fontSize: '0.82rem', color: '#777', marginTop: '6px' }}>
-            Delete is disabled because this committee has documents. Remove all documents first.
+            This committee has {[
+              documentCount > 0 ? pluralize(documentCount, 'document') : null,
+              eventCount > 0 ? pluralize(eventCount, 'event') : null,
+            ].filter(Boolean).join(' and ')}. Deleting will prompt you to transfer them.
           </p>
         )}
       </div>
