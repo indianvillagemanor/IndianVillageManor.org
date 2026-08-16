@@ -505,8 +505,8 @@ export default function CommitteeDetailPage() {
         body: JSON.stringify({
           title: createForm.title.trim(),
           description: createForm.description.trim() || undefined,
-          startAt: createForm.startAt,
-          endAt: createForm.endAt || undefined,
+          startAt: new Date(createForm.startAt).toISOString(),
+          endAt: createForm.endAt ? new Date(createForm.endAt).toISOString() : undefined,
         }),
       });
       const data = await res.json();
@@ -550,8 +550,8 @@ export default function CommitteeDetailPage() {
         body: JSON.stringify({
           title: editForm.title.trim(),
           description: editForm.description.trim() || undefined,
-          startAt: editForm.startAt,
-          endAt: editForm.endAt || undefined,
+          startAt: new Date(editForm.startAt).toISOString(),
+          endAt: editForm.endAt ? new Date(editForm.endAt).toISOString() : undefined,
         }),
       });
       const data = await res.json();
