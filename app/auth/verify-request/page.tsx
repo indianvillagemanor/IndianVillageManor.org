@@ -24,7 +24,8 @@ export default function VerifyRequestPage() {
         </div>
 
         <div className="text-sm text-gray-600 mb-4">
-          <p>The link will expire in 15 minutes.</p>
+          <p>The link expires 15 minutes after it is sent.</p>
+          <p className="mt-2">Once clicked, the same link stays valid for 30 minutes — so a link preview on your device won&apos;t prevent you from signing in.</p>
           <p className="mt-2">If you don&apos;t see the email, check your spam folder.</p>
         </div>
 

@@ -3,8 +3,10 @@ import EmailProvider from 'next-auth/providers/email';
 import GoogleProvider from 'next-auth/providers/google';
 import AzureADProvider from 'next-auth/providers/azure-ad';
 import { PrismaAdapter } from '@auth/prisma-adapter';
+import type { Adapter } from 'next-auth/adapters';
 import { prisma } from './prisma';
 import { sendEmail, replaceTemplateVariables } from './email';
+import { useReusableVerificationToken } from './magic-link';
 import {
   logLoginAttempt,
   logMagicLinkRequest,
@@ -103,7 +105,14 @@ function buildProviders() {
 }
 
 export const authOptions: AuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: {
+    ...PrismaAdapter(prisma),
+    // Override the default single-use token deletion so that magic links
+    // remain valid for 30 minutes after the first click.  This prevents
+    // email-client link-preview requests from permanently invalidating a link
+    // before the user has a chance to click it themselves.
+    useVerificationToken: useReusableVerificationToken,
+  } as Adapter,
   providers: buildProviders(),
   pages: {
     signIn: '/auth/login',
